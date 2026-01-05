@@ -19,5 +19,9 @@ Awesome meticulous job so far! Please keep up the good work! Yes, please save/st
 
 ---
 
+please meticulously continue from where you last stopped. but before you continue, please make to plan and then create a comprehensive ToDo list with integrated checklist. save/stage the ToDo plan/list before you meticulously continue to execute it
+
+---
+
 Now meticulously review and analyze @PAD_review_q.md and @PAD_review_z.md , then review the original @PAD_v1.md , @PAD_v2.md and @PAD_v3.md to have full understanding of the final desired architecture design for the project codebase. Then meticulously plan to create a detailed and comprehensive `MASTER_EXECUTION_PLAN.md` for completing the building of the project codebase in logical independent phases. Include in your `MASTER_EXECUTION_PLAN.md` a list of the files to create/modify, and for each file, describe its features and interfaces, also a checklist for each file. Review and validate your MASTER_EXECUTION_PLAN after creation.
 

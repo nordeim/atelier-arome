@@ -147,9 +147,11 @@
 
 ---
 
-## 📝 Activity 2.4: Configure Tailwind CSS 4.0 with Illuminated Manuscript Theme
+## ✅ Activity 2.4: Configure Tailwind CSS 4.0 with Illuminated Manuscript Theme
 
 **Deliverable:** Custom Tailwind configuration with design tokens
+
+**Status:** COMPLETED ✅
 
 **Detailed Checklist:**
 ```
@@ -356,9 +358,11 @@
 
 ---
 
-## 📝 Activity 2.7: Configure Next.js
+## ✅ Activity 2.7: Configure Next.js
 
 **Deliverable:** Production-ready Next.js configuration
+
+**Status:** COMPLETED ✅
 
 **Detailed Checklist:**
 ```

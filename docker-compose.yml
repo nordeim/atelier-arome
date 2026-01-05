@@ -1,0 +1,108 @@
+# InvoiceForge Docker Compose Configuration
+# PostgreSQL 16 Alpine + MailHog Development Environment
+#
+# Usage:
+#   docker-compose up -d        # Start all services in background
+#   docker-compose up db        # Start only PostgreSQL
+#   docker-compose down         # Stop all services
+#   docker-compose logs -f db   # View database logs
+#
+# Database Admin:
+#   docker-compose exec db psql -U atelier -d atelier_development
+#
+# MailHog Web UI: http://localhost:8025
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PostgreSQL 16 Alpine Database
+  # ═══════════════════════════════════════════════════════════════════════════
+  db:
+    image: postgres:16-alpine
+    container_name: atelier_db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-atelier_dev_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-atelier_dev_db}
+
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+    volumes:
+      # Persist data between container restarts
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: Mount init scripts
+      - ./docker/init-db:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atelier} -d ${POSTGRES_DB:-atelier_development}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - atelier_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MailHog - Email Testing Service
+  # ═══════════════════════════════════════════════════════════════════════════
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: atelier_mailhog
+    restart: unless-stopped
+
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+
+    networks:
+      - atelier_network
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Rails Application (Optional - for full Docker deployment)
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Uncomment below if you want to run Rails inside Docker too
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: atelier_web
+  #   restart: unless-stopped
+  #   
+  #   environment:
+  #     RAILS_ENV: development
+  #     DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+  #   
+  #   ports:
+  #     - "${APP_PORT:-3000}:3000"
+  #   
+  #   volumes:
+  #     - .:/app
+  #     - bundle_cache:/usr/local/bundle
+  #     - node_modules:/app/node_modules
+  #   
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   
+  #   networks:
+  #     - atelier_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Named Volumes
+  # ═══════════════════════════════════════════════════════════════════════════
+volumes:
+  postgres_data:
+    driver: local
+  # bundle_cache:
+  #   driver: local
+  # node_modules:
+  #   driver: local
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Networks
+  # ═══════════════════════════════════════════════════════════════════════════
+networks:
+  atelier_network:
+    driver: bridge
