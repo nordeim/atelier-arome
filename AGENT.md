@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENT.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working on code in this repository.
 
 ---
 
@@ -18,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 │  ┌──────────────┐          ┌──────────────────┐    │
 │  │  Next.js 15  │◄──JSON──►│  Laravel 12 API  │    │
 │  │  (Frontend)  │          │  (Backend)       │    │
+│  │  Vercel Edge │          │  Forge/Vapor     │    │
 │  └──────────────┘          └──────────────────┘    │
 │         │                           │               │
 │         │                           ▼               │
@@ -26,10 +27,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 │         │                  │  Redis 7.x       │    │
 │         │                  │  Meilisearch     │    │
 │         │                  └──────────────────┘    │
-│         ▼                                           │
+│         │                                          │
+│         ▼                                          │
 │  ┌──────────────┐                                  │
 │  │  Stripe API  │                                  │
 │  │  PayNow      │                                  │
+│  │  SingPost    │                                  │
+│  │  Cloudinary   │                                  │
 │  └──────────────┘                                  │
 └─────────────────────────────────────────────────────┘
 ```
@@ -62,19 +66,22 @@ This is a **monorepo** containing two separate projects:
 
 ```
 atelier-arome/
-├── atelier-arome-api/      # Laravel 12 backend API
-├── atelier-arome-web/      # Next.js 15 frontend
-├── docs/                    # Project documentation
-│   ├── Comprehensive_Project_Understanding.md
-│   └── architecture.md
-├── MASTER_EXECUTION_PLAN.md # Phase-by-phase implementation plan
+├── atelier-arome-api/      # Laravel 12 backend API ✅
+├── atelier-arome-web/      # Next.js 15 frontend ✅
+├── docker/                 # Docker configuration
+│   └── docker-compose.yml
+├── docs/                   # Project documentation
+│   └── Comprehensive_Project_Understanding.md
+├── Updated_Project_Understanding.md  # Current project state
+├── MASTER_EXECUTION_PLAN.md        # Phase-by-phase implementation plan
 ├── Project_Architecture_Document.md
 ├── index.html              # Static mockup reference
 ├── styles.css              # Design system reference
-└── main.js                 # JavaScript reference
+├── main.js                # JavaScript reference
+└── AGENT.md               # This file
 ```
 
-**IMPORTANT:** The `atelier-arome-api/` and `atelier-arome-web/` directories will be created during Phase 1. Currently, this repository contains planning documents and static mockup files.
+**Current Status:** Both projects have been created during Phase 1 ✅
 
 ---
 
@@ -85,8 +92,8 @@ atelier-arome/
 **Prerequisites:**
 - PHP 8.3+
 - Composer 2.x
-- PostgreSQL 16
-- Redis 7.x
+- PostgreSQL 16 (running via Docker: atelier_db container)
+- Redis 7.x (running via Docker: atelier_redis container)
 - Node.js 20+ (for asset compilation)
 
 **Setup:**
@@ -101,7 +108,7 @@ npm install
 cp .env.example .env
 php artisan key:generate
 
-# Database setup
+# Database setup (PostgreSQL running via Docker)
 createdb atelier_arome_dev
 php artisan migrate
 php artisan db:seed
@@ -222,7 +229,7 @@ class Product extends Model {
 
 ### 2. Soft Deletes
 
-**Critical tables use soft deletes** (users, products, orders):
+**Critical tables use soft deletes** (users, products, orders, addresses):
 
 ```php
 // Migrations
@@ -363,14 +370,63 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: { DEFAULT: '#2A2D26', light: '#4A4D46', muted: '#545752' },
-        gold: { DEFAULT: '#C9A769', light: '#E8D8B6', dark: '#A98750' },
-        parchment: { DEFAULT: '#FAF8F5', dark: '#F5F1EB', darker: '#E8E4D9' },
+        ink: {
+          DEFAULT: '#2A2D26',
+          light: '#4A4D46',
+          muted: '#545752',
+        },
+        gold: {
+          DEFAULT: '#C9A769',
+          light: '#E8D8B6',
+          dark: '#A98750',
+          muted: 'rgba(201, 167, 105, 0.3)',
+          text: '#8B7355',
+        },
+        parchment: {
+          DEFAULT: '#FAF8F5',
+          dark: '#F5F1EB',
+          darker: '#E8E4D9',
+        },
+        // Botanical accents
+        lavender: '#B8A9C9',
+        eucalyptus: '#7CB9A0',
+        bergamot: '#F5D489',
+        rosehip: '#E8B4B8',
+        // Supporting colors
+        bronze: '#9A8C6D',
+        rose: '#B87D7D',
+        sage: '#7C6354',
+        slate: '#7A8C9D',
       },
       fontFamily: {
         display: ['Cormorant Garamond', 'Georgia', 'serif'],
         body: ['Crimson Pro', 'Georgia', 'serif'],
         accent: ['Great Vibes', 'cursive'],
+        ornament: ['Playfair Display', 'serif'],
+      },
+      spacing: {
+        // Golden Ratio inspired
+        '3xs': '0.125rem',
+        '2xs': '0.25rem',
+        'xs': '0.5rem',
+        'sm': '0.75rem',
+        'md': '1rem',
+        'lg': '1.5rem',
+        'xl': '2rem',
+        '2xl': '3rem',
+        '3xl': '4rem',
+        '4xl': '6rem',
+        '5xl': '8rem',
+        '6xl': '12rem',
+      },
+      boxShadow: {
+        'gold': '0 0 40px rgba(201, 167, 105, 0.2)',
+      },
+      transitionDuration: {
+        'micro': '150ms',
+        'fast': '300ms',
+        'base': '500ms',
+        'slow': '800ms',
       },
     },
   },
@@ -402,42 +458,72 @@ export default {
 
 ## Database Schema Overview
 
-**22 Tables Total:**
+**Total Tables:** 24 (22 business + migrations + sessions)
 
-**Core Commerce:**
+**Core Auth (3 tables):**
 - `users` (customer + admin unified, UUID, soft deletes, role enum)
+- `password_reset_tokens` (secure password recovery)
+- `sessions` (Laravel session storage)
+
+**Products & Categories (7 tables):**
+- `categories` (Singles, Blends, Sets, Gifts)
 - `products` (UUID, category FK, humour/rarity/season enums, JSONB meta_data, soft deletes)
 - `product_variants` (5ml, 15ml, 30ml sizes with SKU, price_sgd, is_default flag)
 - `product_images` (multiple images per product, is_primary flag, sort_order)
-- `categories` (Singles, Blends, Sets, Gifts)
-- `tags` (scent note tags for many-to-many with products)
+- `tags` (scent note tags)
+- `product_tag` (many-to-many pivot)
+- `inventories` (stock tracking per variant)
+- `inventory_movements` (audit log for stock changes)
 
-**Shopping Cart:**
+**Shopping Cart (2 tables):**
 - `carts` (user_id nullable for guest carts, session_id, expires_at for cleanup)
 - `cart_items` (variant FK, quantity, unit_price snapshot)
 
-**Orders:**
+**Orders (5 tables):**
 - `orders` (UUID, order_number format: AA-YYYYMMDD-XXXX, status/payment_status enums, GST calculation)
 - `order_items` (snapshot pattern: product_name, variant_name, sku, unit_price stored as strings)
 - `payments` (Stripe payment_intent_id, method enum: card/paynow/grabpay)
-
-**User Data:**
 - `addresses` (shipping/billing, Singapore postal code validation, is_default flags)
-- `wishlists` + `wishlist_items`
-- `reviews` (product FK, user FK, order FK, rating 1-5, is_verified_purchase)
-
-**Inventory:**
-- `inventories` (variant FK, quantity, reserved_quantity, low_stock_threshold)
-- `inventory_movements` (audit log: addition/subtraction/reservation/release)
-
-**Marketing:**
 - `coupons` (type enum: percentage/fixed_amount/free_shipping)
 - `coupon_usages` (redemption tracking)
+
+**User Data (5 tables):**
+- `reviews` (product FK, user FK, order FK, rating 1-5, is_verified_purchase)
 - `testimonials` (is_illuminated flag for featured styling)
+- `wishlists` + `wishlist_items`
 - `newsletter_subscribers` (double opt-in with confirmation_token)
 
-**System:**
+**System (2 tables):**
 - `settings` (key-value store, type enum: string/integer/boolean/json)
+- `migrations` (Laravel migration tracking - system table)
+
+### Sample Data Seeded (Phase 1)
+
+**Users:** 5 records
+- 1 Super Admin: superadmin@atelierarome.sg
+- 1 Admin: admin@atelierarome.sg
+- 3 Customers: jane@example.com, john@example.com, alice@example.com
+
+**Categories:** 4 records
+- Singles, Blends, Sets, Gifts
+
+**Tags:** 27 records
+- 19 scent note tags (lavender, rose, jasmine, bergamot, lemon, etc.)
+- 8 alchemical property tags (calming, uplifting, grounding, clarifying, etc.)
+
+**Products:** 5 records with full data
+- Lavender Essential Oil (calming, common, summer, 3 variants)
+- Bergamot Essential Oil (uplifting, common, spring, 3 variants)
+- Peace & Harmony Blend (calming, limited, winter, 3 variants)
+- Energy Boost Blend (uplifting, rare, summer, 3 variants)
+- Complete Sleep Set (calming, limited, winter, 1 variant)
+
+**Total Records:**
+- Product Variants: 13 (3 per product × 4 + 1 for set)
+- Product Images: 15 (3 per product × 5)
+- Inventory Records: 13
+- Testimonials: 5
+- Settings: 7 (GST rate, currency, store settings, etc.)
 
 ### Critical Relationships
 
@@ -532,6 +618,36 @@ POST /api/v1/checkout/confirm          # Place order + charge
 
 ---
 
+## Infrastructure (Docker)
+
+**Current Docker Containers (Running):**
+
+| Container | Image | Purpose | Status |
+|-----------|--------|---------|--------|
+| atelier_db | postgres:16-alpine | Primary database | Up (healthy) |
+| atelier_redis | redis:7.4-alpine | Cache, session, queue | Up (healthy) |
+| atelier_mailhog | mailhog/mailhog:latest | Email testing | Up |
+
+**Docker Configuration:**
+- File: `/docker/docker-compose.yml`
+- PostgreSQL on port 5432
+- Redis on port 6379
+- Mailhog on ports 1025 (SMTP) and 8025 (Web UI)
+
+**Accessing Docker Services:**
+```bash
+# PostgreSQL
+docker exec -it atelier_db psql -U postgres -d atelier_arome_dev
+
+# Redis
+docker exec -it atelier_redis redis-cli ping  # Should return PONG
+
+# Mailhog Web UI
+open http://localhost:8025
+```
+
+---
+
 ## Testing Strategy
 
 ### Backend Testing (PHPUnit/Pest)
@@ -602,20 +718,27 @@ APP_KEY=                        # php artisan key:generate
 APP_URL=http://localhost:8000
 
 DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
 DB_DATABASE=atelier_arome_dev
 DB_USERNAME=postgres
 DB_PASSWORD=
 
 REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+# Mail (Mailhog for development)
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_FROM_ADDRESS=noreply@atelierarome.sg
+MAIL_FROM_NAME="${APP_NAME}"
 
 # Stripe (test mode)
 STRIPE_KEY=pk_test_...
 STRIPE_SECRET=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Email (Resend)
-MAIL_MAILER=smtp
-MAIL_FROM_ADDRESS=noreply@atelierarome.sg
 
 # Search
 MEILISEARCH_HOST=http://127.0.0.1:7700
@@ -637,6 +760,9 @@ NEXTAUTH_SECRET=                # openssl rand -base64 32
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Analytics (optional)
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=localhost
 ```
 
 ---
@@ -705,6 +831,10 @@ images: {
       hostname: 'res.cloudinary.com',
       pathname: '/atelier-arome/**',
     },
+    {
+      protocol: 'https',
+      hostname: 'placehold.co',
+    },
   ],
 }
 ```
@@ -725,25 +855,42 @@ images: {
 ## Key Documentation Files
 
 1. **`MASTER_EXECUTION_PLAN.md`** - Phase-by-phase implementation plan (16 phases, 85 days)
-2. **`Project_Architecture_Document.md`** - Complete technical specification
-3. **`docs/Comprehensive_Project_Understanding.md`** - Deep analysis and rationale
-4. **`styles.css`** - Complete "Illuminated Manuscript" design system reference
+2. **`Updated_Project_Understanding.md`** - Current project state and deep understanding
+3. **`Project_Architecture_Document.md`** - Complete technical specification
+4. **`docs/Comprehensive_Project_Understanding.md`** - Deep analysis and rationale
+5. **`styles.css`** - Complete "Illuminated Manuscript" design system reference
+6. **`DAY_3_COMPLETION_SUMMARY.md`** - Phase 1 completion status
 
 ---
 
 ## Phase Status
 
-**Current Phase:** Phase 1 (Foundation)
+**Current Phase:** Phase 1 Complete ✅ → Phase 2 Ready ⏳
 
-The project is in the planning stage. The following must be completed before development:
+**Phase 1 (Foundation) - 100% Complete ✅:**
+- [x] Create `atelier-arome-api/` Laravel 12 project ✅
+- [x] Create `atelier-arome-web/` Next.js 15 project ✅
+- [x] Set up PostgreSQL database with 24 table migrations ✅
+- [x] Configure Redis for cache/session/queue ✅
+- [x] Docker infrastructure configured (atelier_db, atelier_redis, atelier_mailhog) ✅
+- [x] Install Shadcn-UI components with custom theme ✅
+- [x] Implement "Illuminated Manuscript" Tailwind theme ✅
+- [x] Create all database seeders (6 seeders) ✅
+- [x] Seed sample data (5 users, 4 categories, 27 tags, 5 products) ✅
+- [x] App Router structure created with route groups ✅
+- [x] Frontend build successful and dev server running ✅
+- [x] Backend API server running and tested ✅
 
-**Phase 1 Checklist:**
-- [ ] Create `atelier-arome-api/` Laravel 12 project
-- [ ] Create `atelier-arome-web/` Next.js 15 project
-- [ ] Set up PostgreSQL database with 22 table migrations
-- [ ] Configure Redis for cache/session/queue
-- [ ] Install Shadcn-UI components with custom theme
-- [ ] Implement "Illuminated Manuscript" Tailwind theme
+**Phase 2 (Backend Core) - Ready to Begin ⏳:**
+- [ ] Refine all 22 Eloquent models with complete relationships
+- [ ] Create API resource transformers
+- [ ] Create base controller with common CRUD methods
+- [ ] Implement authentication routes (Laravel Sanctum)
+- [ ] Create Product CRUD API endpoints
+- [ ] Create Category and Tag listing endpoints
+- [ ] Implement exception handler with consistent API error format
+- [ ] Configure rate limiting middleware (60 requests/minute)
+- [ ] Write comprehensive tests (unit + feature)
 
 **See `MASTER_EXECUTION_PLAN.md` for complete phase breakdown.**
 
@@ -763,7 +910,7 @@ The project is in the planning stage. The following must be completed before dev
 
 ```php
 // routes/api.php
-Route::middleware(['throttle:10,1'])->group(function () {
+Route::middleware(['throttle:60,1'])->group(function () {
     Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe']);
     Route::post('/contact', [ContactController::class, 'send']);
 });
@@ -791,7 +938,7 @@ Route::middleware(['throttle:10,1'])->group(function () {
 
 | Environment | Frontend | Backend | Database |
 |-------------|----------|---------|----------|
-| Development | localhost:3000 | localhost:8000 | Local PostgreSQL |
+| Development | localhost:3000 | localhost:8000 | Docker: atelier_db (PostgreSQL 16) |
 | Staging | staging.atelierarome.com | api-staging.atelierarome.com | Neon staging |
 | Production | atelierarome.com | api.atelierarome.com | Neon production |
 
@@ -818,6 +965,7 @@ Instead, emphasizing:
 - Custom Tailwind theme with Cormorant Garamond, Crimson Pro, Great Vibes fonts
 - Alchemical and botanical themes aligned with aromatherapy heritage
 - WCAG AAA accessibility standards
+- Intentional minimalism: whitespace and hierarchy speak louder than decoration
 
 ### Component Development Guidelines
 
@@ -828,16 +976,24 @@ When creating new components:
 3. **Add ARIA labels** for screen readers
 4. **Support reduced motion** via `prefers-reduced-motion: reduce`
 5. **Test keyboard navigation** (Tab, Enter, Escape)
+6. **Every element earns its place through calculated purpose**
 
 ### When in Doubt
 
-1. Check `MASTER_EXECUTION_PLAN.md` for phase-specific implementation details
-2. Refer to `Project_Architecture_Document.md` for technical specifications
-3. Review `styles.css` for design system tokens and patterns
-4. Consult `docs/Comprehensive_Project_Understanding.md` for architectural rationale
+1. Check `Updated_Project_Understanding.md` for current project state and detailed understanding
+2. Check `MASTER_EXECUTION_PLAN.md` for phase-specific implementation details
+3. Refer to `Project_Architecture_Document.md` for technical specifications
+4. Review `styles.css` for design system tokens and patterns
+5. Consult `docs/Comprehensive_Project_Understanding.md` for architectural rationale
+6. Review `DAY_3_COMPLETION_SUMMARY.md` for Phase 1 implementation details
 
 ---
 
 **Last Updated:** January 5, 2026
-**Project Status:** Pre-Development (Planning Phase)
+**Project Status:** Phase 1 Complete ✅ (100%) - Phase 2 Ready ⏳
 **Architecture Type:** Headless Commerce (Laravel 12 API + Next.js 15)
+**Backend Server:** http://localhost:8000 ✅
+**Frontend Server:** http://localhost:3000 ✅
+**Database:** PostgreSQL 16 (Docker: atelier_db) ✅
+**Cache/Queue:** Redis 7.4 (Docker: atelier_redis) ✅
+**Email Testing:** Mailhog (Docker: atelier_mailhog) ✅
