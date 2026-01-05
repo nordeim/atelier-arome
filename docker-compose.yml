@@ -45,6 +45,23 @@ services:
     networks:
       - atelier_network
 
+  redis:
+    image: redis:7.4-alpine
+    container_name: atelier_redis
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ═══════════════════════════════════════════════════════════════════════════
   # MailHog - Email Testing Service
   # ═══════════════════════════════════════════════════════════════════════════
@@ -95,6 +112,7 @@ services:
 volumes:
   postgres_data:
     driver: local
+  redis_data:
   # bundle_cache:
   #   driver: local
   # node_modules:
