@@ -1,7 +1,7 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: ['./src/**/*.{ts,tsx}'],
   
   theme: {
@@ -45,12 +45,12 @@ const config: Config = {
         xs: ['clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)', { lineHeight: '1.5' }],
         sm: ['clamp(0.875rem, 0.8rem + 0.35vw, 1rem)', { lineHeight: '1.5' }],
         base: ['clamp(1rem, 0.95rem + 0.25vw, 1.125rem)', { lineHeight: '1.6' }],
-        lg: ['clamp(1.125rem, 1rem + 0.5vw, 1.25rem)', { lineHeight: '1.6' }],
-        xl: ['clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)', { lineHeight: '1.4' }],
-        '2xl': ['clamp(1.5rem, 1.25rem + 1.25vw, 2rem)', { lineHeight: '1.3' }],
-        '3xl': ['clamp(2rem, 1.5rem + 2.5vw, 3rem)', { lineHeight: '1.1' }],
-        '4xl': ['clamp(2.5rem, 2rem + 2.5vw, 4rem)', { lineHeight: '0.95' }],
-        '5xl': ['clamp(3rem, 2.5rem + 2.5vw, 5rem)', { lineHeight: '0.9' }],
+        lg: ['clamp(1.125rem, 1.1rem + 0.5vw, 1.25rem)', { lineHeight: '1.4' }],
+        xl: ['clamp(1.25rem, 1.2rem + 0.75vw, 1.5rem)', { lineHeight: '1.3' }],
+        '2xl': ['clamp(1.5rem, 1.4rem + 2.5vw, 2rem)', { lineHeight: '1.1' }],
+        '3xl': ['clamp(2rem, 1.8rem + 2.5vw, 3rem)', { lineHeight: '0.9' }],
+        '4xl': ['clamp(2.5rem, 2.25rem + 2.5vw, 4rem)', { lineHeight: '0.95' }],
+        '5xl': ['clamp(3rem, 2.75rem + 2.5vw, 5rem)', { lineHeight: '1' }],
       },
       
       spacing: {
@@ -82,7 +82,7 @@ const config: Config = {
         md: '0 4px 12px rgba(42, 45, 38, 0.08)',
         lg: '0 8px 24px rgba(42, 45, 38, 0.1)',
         xl: '0 16px 48px rgba(42, 45, 38, 0.12)',
-        gold: '0 0 40px rgba(201, 167, 105, 0.2)',
+        gold: '0 40px rgba(201, 167, 105, 0.2)',
       },
       
       transitionDuration: {
@@ -105,12 +105,10 @@ const config: Config = {
         'liquid-wave': {
           '0%, 100%': { transform: 'translateY(0) scaleY(1)' },
           '50%': { transform: 'translateY(-10px) scaleY(1.05)' },
-          '100%': { transform: 'translateY(0) scaleY(1)' },
         },
         'float-botanical': {
           '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
           '50%': { transform: 'translateY(-20px) rotate(5deg)' },
-          '100%': { transform: 'translateY(0) rotate(0deg)' },
         },
         'rotate-seal': {
           'from': { transform: 'rotate(0deg)' },
@@ -121,7 +119,7 @@ const config: Config = {
           '50%': { transform: 'translateY(10px) rotate(5deg)' },
           '100%': { transform: 'translateY(0) rotate(0deg)' },
         },
-        pulse: {
+        'pulse': {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
           '50%': { opacity: '0.7', transform: 'scale(1.05)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
@@ -129,10 +127,11 @@ const config: Config = {
       },
     },
   },
+  
   plugins: [
     require('tailwindcss-animate'),
     require('@tailwindcss/typography'),
   ],
-}
+};
 
-export default config
+export default config;

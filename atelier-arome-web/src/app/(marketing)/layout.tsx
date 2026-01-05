@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Marketing — Atelier Arôme',
@@ -9,7 +8,9 @@ export const metadata: Metadata = {
 
 export default function MarketingLayout({
   children,
-}: Readonly<React.ReactNode> {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <main>
       <div className="min-h-screen w-full">
@@ -18,11 +19,11 @@ export default function MarketingLayout({
             <h1 className="font-display text-3xl text-ink">Atelier Arôme</h1>
           </Link>
         </header>
-        
+
         <main className="max-w-container mx-auto px-4 py-16">
           {children}
-          </main>
-        
+        </main>
+
         <footer className="mt-20 border-t border-gold/30 pt-10 pb-10">
           <p className="text-sm text-ink-muted">
             © {new Date().getFullYear()} Atelier Arôme. All rights reserved.

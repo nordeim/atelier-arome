@@ -19,7 +19,6 @@ export default function Loading() {
               fill="none"
               strokeWidth="3"
             />
-          </circle>
           </svg>
         </div>
       </div>

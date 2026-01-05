@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 
 export default function ShopLayout({
@@ -8,7 +7,7 @@ export default function ShopLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [, setIsCartOpen] = React.useState(false);
+  const [isCartOpen, setIsCartOpen] = React.useState(false);
 
   return (
     <main className="min-h-screen bg-parchment">
@@ -57,7 +56,7 @@ export default function ShopLayout({
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M3 3h2l-4 4H2c-1.1 0-2-.9-2-2v4c0 1.1.9 2 2 2h4l4 4V6c0-1.1-.9-2-2-2zm14 0v-2a2 2 0 002 2v4c0 1.1.9 2 2 2h4l4 4V6c0-1.1-.9-2-2-2z"
+                    d="M3 3h2l-4 4H2c-1.1 0-2-.9-2-2v4c0-1.1.9-2 2-2h4l4-4V6c0-1.1-.9-2-2-2z"
                   />
                 </svg>
               </button>
