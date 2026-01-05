@@ -61,3 +61,48 @@ a:hover {
 html {
   scroll-behavior: smooth;
 }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  border-radius: 0.125rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background-color: var(--color-ink);
+  color: var(--color-parchment);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-gold);
+}
+
+.btn--secondary {
+  border: 2px solid var(--color-ink);
+  color: var(--color-ink);
+  background-color: transparent;
+}
+
+.btn--secondary:hover {
+  background-color: var(--color-ink);
+  color: var(--color-parchment);
+}
+
+.btn--outline {
+  border: 2px solid var(--color-ink);
+  color: var(--color-ink);
+  background-color: transparent;
+}
+
+.btn--outline:hover {
+  background-color: var(--color-ink);
+  color: var(--color-parchment);
+}
