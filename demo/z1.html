@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHER | Urban Orchestrator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 
+         * DESIGN SYSTEM: CYBER-UTILITY
+         * Anti-Generic / High-Contrast / Technical
+         */
+        :root {
+            --bg-deep: #050a10;
+            --bg-panel: rgba(15, 23, 42, 0.75);
+            --bg-grid: #0f172a;
+            --border: rgba(56, 189, 248, 0.2);
+            
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --accent-green: #10b981;
+            --accent-rose: #f43f5e;
+            
+            --font-ui: 'Inter', sans-serif;
+            --font-data: 'Fira Code', monospace;
+            
+            --glass: blur(12px) saturate(180%);
+            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { box-sizing: border-box; outline: none; user-select: none; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- LAYOUT ARCHITECTURE --- */
+        #app-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            grid-template-rows: 60px 1fr;
+        }
+
+        /* --- CANVAS (GRID) --- */
+        #city-viewport {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        #city-grid {
+            display: grid;
+            grid-template-columns: repeat(20, 40px);
+            grid-template-rows: repeat(20, 40px);
+            gap: 2px;
+            padding: 40px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.5);
+            transition: transform 0.5s var(--ease);
+        }
+
+        .tile {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-grid);
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-data);
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tile:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent-cyan);
+            z-index: 10;
+        }
+
+        .tile.drag-over {
+            background: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        /* Tile Types */
+        .tile[data-type="res"] { border-bottom: 3px solid var(--accent-green); color: var(--accent-green); }
+        .tile[data-type="com"] { border-bottom: 3px solid var(--accent-cyan); color: var(--accent-cyan); }
+        .tile[data-type="ind"] { border-bottom: 3px solid var(--accent-amber); color: var(--accent-amber); }
+        .tile[data-type="pwr"] { border-bottom: 3px solid var(--accent-rose); color: var(--accent-rose); }
+        
+        .tile i { opacity: 0.7; font-style: normal; font-weight: bold; }
+
+        /* --- UI OVERLAY: HEADER --- */
+        header {
+            grid-column: 1 / 3;
+            grid-row: 1 / 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
+            border-bottom: 1px solid var(--border);
+            z-index: 50;
+        }
+
+        .brand {
+            font-family: var(--font-data);
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.05em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .brand span { color: var(--accent-cyan); }
+
+        .sim-controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        button.btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            font-family: var(--font-data);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        button.btn:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(56, 189, 248, 0.1);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+
+        button.btn-primary {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            color: #000;
+            font-weight: 700;
+        }
+
+        button.btn-primary:hover {
+            background: #22d3ee;
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        /* --- UI OVERLAY: SIDEBAR --- */
+        aside {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            z-index: 40;
+            overflow-y: auto;
+        }
+
+        .panel-section h3 {
+            margin: 0 0 16px 0;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-family: var(--font-data);
+        }
+
+        /* Stats Panel */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-family: var(--font-data);
+        }
+
+        .stat-val { font-weight: bold; }
+        .stat-val.neg { color: var(--accent-rose); }
+        .stat-val.pos { color: var(--accent-green); }
+
+        .bar-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 6px;
+            position: relative;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background: var(--accent-cyan);
+            width: 50%;
+            transition: width 0.5s var(--ease);
+        }
+
+        /* Toolkit */
+        .toolkit {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 12px;
+            cursor: grab;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .tool-card:hover {
+            border-color: var(--text-main);
+            transform: translateY(-2px);
+        }
+
+        .tool-card:active { cursor: grabbing; }
+
+        .tool-header {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .tool-cost {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-family: var(--font-data);
+        }
+
+        /* Log / Console */
+        .system-log {
+            flex-grow: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            padding: 12px;
+            font-family: var(--font-data);
+            font-size: 0.75rem;
+            overflow-y: auto;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .log-entry { border-left: 2px solid transparent; padding-left: 8px; }
+        .log-entry.info { border-color: var(--accent-cyan); }
+        .log-entry.warn { border-color: var(--accent-amber); color: var(--accent-amber); }
+        .log-entry.err { border-color: var(--accent-rose); color: var(--accent-rose); }
+
+        /* Time Indicator */
+        .time-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-family: var(--font-data);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* SVG Sparkline */
+        .chart-container {
+            width: 100%;
+            height: 40px;
+            margin-top: 8px;
+        }
+        
+        polyline {
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 2;
+            vector-effect: non-scaling-stroke;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- HEADER -->
+        <header>
+            <div class="brand">
+                <span>◆</span> AETHER / URBAN OS
+            </div>
+            <div class="sim-controls">
+                <span id="date-display" style="font-family: var(--font-data); color: var(--text-muted); font-size: 0.9rem;">Y: 001 D: 01</span>
+                <button class="btn" id="btn-reset">RESET</button>
+                <button class="btn btn-primary" id="btn-simulate">START SIMULATION</button>
+            </div>
+        </header>
+
+        <!-- CITY VIEWPORT -->
+        <main id="city-viewport">
+            <div class="time-indicator">LAT: 40.7128° N | LNG: 74.0060° W</div>
+            <div id="city-grid">
+                <!-- Grid generated by JS -->
+            </div>
+        </main>
+
+        <!-- SIDEBAR -->
+        <aside>
+            <!-- Resources -->
+            <section class="panel-section">
+                <h3>Resource Matrix</h3>
+                <div class="stat-grid">
+                    <div>
+                        <div class="stat-row">
+                            <span>POPULATION</span>
+                            <span class="stat-val" id="val-pop">0</span>
+                        </div>
+                        <div class="bar-container"><div class="bar-fill" id="bar-pop" style="background: var(--accent-green)"></div></div>
+                    </div>
+                    <div>
+                        <div class="stat-row">
+                            <span>ENERGY (MWh)</span>
+                            <span class="stat-val" id="val-nrg">0</span>
+                        </div>
+                        <div class="bar-container"><div class="bar-fill" id="bar-nrg" style="background: var(--accent-cyan)"></div></div>
+                    </div>
+                    <div>
+                        <div class="stat-row">
+                            <span>POLLUTION</span>
+                            <span class="stat-val" id="val-pol">0%</span>
+                        </div>
+                        <div class="bar-container"><div class="bar-fill" id="bar-pol" style="background: var(--accent-rose)"></div></div>
+                    </div>
+                    <div>
+                        <div class="stat-row">
+                            <span>HAPPINESS</span>
+                            <span class="stat-val" id="val-hap">100%</span>
+                        </div>
+                        <div class="bar-container"><div class="bar-fill" id="bar-hap" style="background: var(--accent-amber)"></div></div>
+                    </div>
+                </div>
+                
+                <!-- Mini Chart -->
+                <div style="margin-top: 20px;">
+                    <h3>Growth Trend</h3>
+                    <svg class="chart-container" preserveAspectRatio="none" viewBox="0 0 100 100">
+                        <polyline id="sparkline" points="0,100 100,100" />
+                    </svg>
+                </div>
+            </section>
+
+            <!-- Toolkit -->
+            <section class="panel-section">
+                <h3>Construction Modules</h3>
+                <div class="toolkit">
+                    <div class="tool-card" draggable="true" data-type="res">
+                        <span class="tool-header">RESIDENTIAL</span>
+                        <span class="tool-cost">Cost: 100 | +Pop | -NRG</span>
+                    </div>
+                    <div class="tool-card" draggable="true" data-type="com">
+                        <span class="tool-header">COMMERCIAL</span>
+                        <span class="tool-cost">Cost: 200 | +$$ | -NRG</span>
+                    </div>
+                    <div class="tool-card" draggable="true" data-type="ind">
+                        <span class="tool-header">INDUSTRY</span>
+                        <span class="tool-cost">Cost: 300 | ++NRG | ++Pol</span>
+                    </div>
+                    <div class="tool-card" draggable="true" data-type="pwr">
+                        <span class="tool-header">POWER PLANT</span>
+                        <span class="tool-cost">Cost: 500 | ++++NRG | +Pol</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.7rem; color: var(--text-muted); text-align: center;">
+                    DRAG MODULES TO GRID
+                </div>
+            </section>
+
+            <!-- Logs -->
+            <section class="panel-section" style="flex-grow: 1; display: flex; flex-direction: column;">
+                <h3>System Log</h3>
+                <div class="system-log" id="console-log">
+                    <div class="log-entry info">> System Initialized...</div>
+                    <div class="log-entry info">> Awaiting Input...</div>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <script>
+        /**
+         * AETHER CORE LOGIC
+         * Handling State, DOM Manipulation, and Simulation Loop
+         */
+
+        // --- CONFIGURATION ---
+        const GRID_SIZE = 20; // 20x20 grid
+        const TICK_RATE = 1000; // 1 second per day
+
+        const BUILDINGS = {
+            res: { name: 'Residential', cost: 100, pop: 10, nrg: -2, pol: 0.5, icon: 'R' },
+            com: { name: 'Commercial', cost: 200, pop: 0, nrg: -5, pol: 1, icon: 'C' },
+            ind: { name: 'Industry', cost: 300, pop: 0, nrg: 20, pol: 5, icon: 'I' }, // Note: Industry produces power here for simplicity or can consume
+            pwr: { name: 'Power Plant', cost: 500, pop: 0, nrg: 50, pol: 3, icon: 'P' }
+        };
+
+        // --- STATE ---
+        let state = {
+            grid: [], // 1D array representing 2D grid
+            resources: {
+                pop: 0,
+                nrg: 0,
+                pol: 0,
+                hap: 100,
+                money: 2000
+            },
+            time: { year: 1, day: 1 },
+            isRunning: false,
+            timer: null,
+            history: [] // For sparkline
+        };
+
+        // --- DOM ELEMENTS ---
+        const gridEl = document.getElementById('city-grid');
+        const btnSimulate = document.getElementById('btn-simulate');
+        const btnReset = document.getElementById('btn-reset');
+        const logEl = document.getElementById('console-log');
+        const dateDisplay = document.getElementById('date-display');
+        const sparkline = document.getElementById('sparkline');
+
+        // --- INITIALIZATION ---
+        function init() {
+            createGrid();
+            updateUI();
+            setupDragAndDrop();
+            
+            btnSimulate.addEventListener('click', toggleSimulation);
+            btnReset.addEventListener('click', resetCity);
+        }
+
+        function createGrid() {
+            gridEl.innerHTML = '';
+            state.grid = new Array(GRID_SIZE * GRID_SIZE).fill(null);
+
+            for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.dataset.index = i;
+                
+                // Drop events
+                tile.addEventListener('dragover', handleDragOver);
+                tile.addEventListener('dragleave', handleDragLeave);
+                tile.addEventListener('drop', handleDrop);
+                tile.addEventListener('click', () => removeBuilding(i));
+
+                gridEl.appendChild(tile);
+            }
+        }
+
+        // --- DRAG AND DROP ---
+        let draggedType = null;
+
+        function setupDragAndDrop() {
+            const tools = document.querySelectorAll('.tool-card');
+            tools.forEach(tool => {
+                tool.addEventListener('dragstart', (e) => {
+                    draggedType = e.target.dataset.type;
+                    e.dataTransfer.effectAllowed = 'copy';
+                    e.target.style.opacity = '0.5';
+                });
+                tool.addEventListener('dragend', (e) => {
+                    draggedType = null;
+                    e.target.style.opacity = '1';
+                });
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            e.target.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+            
+            // Handle dropping on the icon inside the div
+            const tile = e.target.classList.contains('tile') ? e.target : e.target.parentElement;
+            const index = parseInt(tile.dataset.index);
+
+            if (state.grid[index]) {
+                log(`Cannot build here: Tile occupied.`, 'warn');
+                return;
+            }
+
+            buildStructure(index, draggedType);
+        }
+
+        // --- CORE LOGIC ---
+        function buildStructure(index, type) {
+            const cost = BUILDINGS[type].cost;
+            if (state.resources.money < cost) {
+                log(`Insufficient Funds for ${BUILDINGS[type].name}.`, 'err');
+                return;
+            }
+
+            // Update State
+            state.resources.money -= cost;
+            state.grid[index] = type;
+
+            // Update DOM
+            const tile = gridEl.children[index];
+            tile.dataset.type = type;
+            tile.innerHTML = `<i>${BUILDINGS[type].icon}</i>`;
+            
+            // Flash animation
+            tile.animate([
+                { transform: 'scale(1)', filter: 'brightness(1)' },
+                { transform: 'scale(1.2)', filter: 'brightness(2)' },
+                { transform: 'scale(1)', filter: 'brightness(1)' }
+            ], { duration: 300 });
+
+            log(`Constructed ${BUILDINGS[type].name} at [${index}]`, 'info');
+            recalcResources();
+            updateUI();
+        }
+
+        function removeBuilding(index) {
+            if (!state.grid[index]) return;
+            const type = state.grid[index];
+            
+            // Refund half
+            const refund = Math.floor(BUILDINGS[type].cost * 0.5);
+            state.resources.money += refund;
+            
+            state.grid[index] = null;
+            
+            const tile = gridEl.children[index];
+            tile.removeAttribute('data-type');
+            tile.innerHTML = '';
+
+            log(`Demolished ${BUILDINGS[type].name}. Refunded: ${refund}`, 'warn');
+            recalcResources();
+            updateUI();
+        }
+
+        function recalcResources() {
+            let pop = 0, nrg = 0, pol = 0;
+
+            state.grid.forEach(cell => {
+                if (!cell) return;
+                const b = BUILDINGS[cell];
+                pop += b.pop;
+                nrg += b.nrg;
+                pol += b.pol;
+            });
+
+            state.resources.pop = pop;
+            state.resources.nrg = nrg;
+            state.resources.pol = Math.min(100, Math.round(pol)); // Cap pollution
+
+            // Happiness Logic
+            // Base 100, minus pollution, minus energy deficit penalty
+            let deficit = 0;
+            if (nrg < 0) deficit = Math.abs(nrg) * 2;
+            
+            let hap = 100 - state.resources.pol - deficit;
+            state.resources.hap = Math.max(0, Math.min(100, hap));
+        }
+
+        // --- SIMULATION ---
+        function toggleSimulation() {
+            if (state.isRunning) {
+                stopSim();
+            } else {
+                startSim();
+            }
+        }
+
+        function startSim() {
+            if (state.resources.pop === 0 && state.grid.filter(x=>x).length === 0) {
+                log("Build something first!", "err");
+                return;
+            }
+            
+            state.isRunning = true;
+            btnSimulate.textContent = "PAUSE SIMULATION";
+            btnSimulate.classList.remove('btn-primary');
+            btnSimulate.style.borderColor = "var(--accent-amber)";
+            btnSimulate.style.color = "var(--accent-amber)";
+            
+            log("Simulation Sequence Initiated...", "info");
+            
+            state.timer = setInterval(() => {
+                tick();
+            }, TICK_RATE);
+        }
+
+        function stopSim() {
+            state.isRunning = false;
+            btnSimulate.textContent = "RESUME SIMULATION";
+            btnSimulate.classList.add('btn-primary');
+            btnSimulate.style.borderColor = "";
+            btnSimulate.style.color = "";
+            
+            clearInterval(state.timer);
+            log("Simulation Paused.", "warn");
+        }
+
+        function tick() {
+            // Advance Time
+            state.time.day++;
+            if (state.time.day > 365) {
+                state.time.day = 1;
+                state.time.year++;
+            }
+
+            // Calculate Income/Costs based on day
+            // Population pays tax, Industry costs money to run? 
+            // Simplified: Population generates passive money if Happy > 50
+            if (state.resources.hap > 50) {
+                state.resources.money += (state.resources.pop * 1);
+            }
+
+            // Random Events (Simple)
+            if (Math.random() > 0.95) {
+                const evType = Math.random() > 0.5 ? 'pos' : 'neg';
+                if (evType === 'pos') {
+                    state.resources.money += 500;
+                    log("Federal Grant Received: +$500", "pos");
+                } else {
+                    state.resources.money -= 200;
+                    log("Maintenance Required: -$200", "err");
+                }
+            }
+
+            // Fail state check
+            if (state.resources.hap <= 0) {
+                stopSim();
+                log("CRITICAL FAILURE: Population revolted. City abandoned.", "err");
+                alert("CITY COLLAPSED: Happiness reached 0.");
+                return;
+            }
+
+            recalcResources();
+            updateUI();
+        }
+
+        function resetCity() {
+            stopSim();
+            state.grid.fill(null);
+            state.resources = { pop: 0, nrg: 0, pol: 0, hap: 100, money: 2000 };
+            state.time = { year: 1, day: 1 };
+            state.history = [];
+            
+            Array.from(gridEl.children).forEach(tile => {
+                tile.removeAttribute('data-type');
+                tile.innerHTML = '';
+            });
+            
+            log("System Reset Complete.", "info");
+            updateUI();
+        }
+
+        // --- UI UPDATES ---
+        function updateUI() {
+            // Text Stats
+            document.getElementById('val-pop').innerText = state.resources.pop;
+            document.getElementById('val-nrg').innerText = state.resources.nrg;
+            document.getElementById('val-pol').innerText = state.resources.pol + "%";
+            document.getElementById('val-hap').innerText = state.resources.hap + "%";
+
+            // Colors
+            const nrgEl = document.getElementById('val-nrg');
+            nrgEl.className = state.resources.nrg < 0 ? 'stat-val neg' : 'stat-val pos';
+            nrgEl.style.color = state.resources.nrg < 0 ? 'var(--accent-rose)' : 'var(--text-main)';
+
+            // Bars
+            document.getElementById('bar-pop').style.width = Math.min(100, (state.resources.pop / 500) * 100) + "%";
+            document.getElementById('bar-nrg').style.width = Math.min(100, (Math.abs(state.resources.nrg) / 200) * 100) + "%";
+            document.getElementById('bar-pol').style.width = state.resources.pol + "%";
+            document.getElementById('bar-hap').style.width = state.resources.hap + "%";
+
+            // Date
+            dateDisplay.innerText = `Y: ${String(state.time.year).padStart(3,'0')}  D: ${String(state.time.day).padStart(2,'0')}`;
+
+            // Sparkline Update (History)
+            if (state.isRunning || state.history.length === 0) {
+                state.history.push(state.resources.pop);
+                if (state.history.length > 20) state.history.shift();
+                
+                // Normalize to 0-100 viewbox
+                const max = Math.max(...state.history, 100);
+                const points = state.history.map((val, idx) => {
+                    const x = (idx / 19) * 100;
+                    const y = 100 - ((val / max) * 100);
+                    return `${x},${y}`;
+                }).join(' ');
+                
+                sparkline.setAttribute('points', points);
+            }
+        }
+
+        function log(msg, type='info') {
+            const entry = document.createElement('div');
+            entry.classList.add('log-entry', type);
+            const time = new Date().toLocaleTimeString([], {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            entry.innerText = `[${time}] ${msg}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

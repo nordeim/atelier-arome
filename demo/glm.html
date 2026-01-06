@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en-SG">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atelier Arôme | Illuminated Aromatherapy</title>
+    
+    <!-- Typography Strategy: Renaissance Stack -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=Great+Vibes&display=swap" rel="stylesheet">
+
+    <style>
+        /* 
+         * DESIGN SYSTEM: ILLUMINATED MANUSCRIPT
+         * Palette: Vellum, Ink, Gold, Botanical
+         */
+        :root {
+            /* Paper & Vellum Tones */
+            --color-paper: #F9F7F1;      /* Main Background */
+            --color-cream: #F2EFE5;      /* Card Backgrounds */
+            --color-parchment: #E6E2D6;  /* Borders */
+            
+            /* Ink & Graphite */
+            --color-ink: #1A1A1A;        /* Primary Text */
+            --color-graphite: #4A4A4A;   /* Secondary Text */
+            
+            /* Metallic & Alchemical */
+            --color-gold: #BFA05A;       /* Accents */
+            --color-gold-light: #DCC18A;
+            --color-bronze: #8C6B3D;
+            
+            /* Botanical */
+            --color-botanical: #3F4F3F;  /* Muted Green */
+            --color-sage: #8FA391;
+
+            /* Dimensions */
+            --container-width: 1200px;
+            --spacing-unit: 8px;
+        }
+
+        /* --- RESET & BASE --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--color-paper);
+            color: var(--color-ink);
+            font-family: 'Crimson Pro', serif;
+            font-size: 18px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            /* Subtle Paper Grain Texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 400;
+            color: var(--color-ink);
+        }
+
+        .font-script { font-family: 'Great Vibes', cursive; color: var(--color-gold); }
+        
+        .drop-cap::first-letter {
+            font-family: 'Cormorant Garamond', serif;
+            float: left;
+            font-size: 4.5rem;
+            line-height: 0.8;
+            padding-right: 12px;
+            padding-top: 4px;
+            color: var(--color-gold);
+        }
+
+        a { color: var(--color-ink); text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.3s ease; }
+        a:hover { border-bottom-color: var(--color-gold); color: var(--color-gold); }
+
+        /* --- LAYOUT UTILITIES --- */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .ornamental-border {
+            border: 1px solid var(--color-parchment);
+            position: relative;
+            padding: 40px;
+            margin: 40px 0;
+        }
+        
+        /* Corner decorations using pseudo-elements */
+        .ornamental-border::before, .ornamental-border::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-gold);
+            transition: all 0.3s ease;
+        }
+        .ornamental-border::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .ornamental-border::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+        /* --- HEADER --- */
+        header {
+            padding: 40px 0;
+            text-align: center;
+            border-bottom: 1px solid var(--color-parchment);
+            margin-bottom: 60px;
+        }
+
+        .brand-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        nav a { font-size: 0.85rem; color: var(--color-graphite); font-family: 'Crimson Pro', serif; font-weight: 600; }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 120px;
+            min-height: 70vh;
+        }
+
+        .hero-text h1 {
+            font-size: 5rem;
+            line-height: 0.9;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--color-graphite);
+            margin-bottom: 40px;
+            max-width: 90%;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            padding: 16px 40px;
+            border: 1px solid var(--color-ink);
+            font-family: 'Crimson Pro', serif;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .cta-btn:hover {
+            background: var(--color-ink);
+            color: var(--color-gold);
+            border-color: var(--color-ink);
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 600px;
+            background: var(--color-cream);
+            border-radius: 2px; /* Slight imperfection */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Botanical Illustration Simulation (CSS Art) */
+        .botanical-art {
+            width: 80%;
+            height: 80%;
+            position: relative;
+            opacity: 0.8;
+        }
+        .leaf {
+            position: absolute;
+            background: var(--color-botanical);
+            border-radius: 0 50% 0 50%;
+            transform: rotate(-45deg);
+        }
+        .leaf-1 { width: 300px; height: 150px; top: 20%; left: 20%; opacity: 0.1; transform: rotate(15deg); }
+        .leaf-2 { width: 200px; height: 100px; top: 40%; left: 40%; opacity: 0.2; transform: rotate(-20deg); }
+        .leaf-3 { width: 400px; height: 200px; top: 10%; left: 10%; opacity: 0.05; transform: rotate(45deg); }
+
+        /* --- CURATED COLLECTION --- */
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-header h2 { font-size: 3rem; font-style: italic; color: var(--color-gold); }
+        .section-header p { color: var(--color-graphite); margin-top: 10px; }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-bottom: 120px;
+        }
+
+        .product-card {
+            background: var(--color-paper);
+            border: 1px solid var(--color-parchment);
+            padding: 20px;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+            border-color: var(--color-gold);
+        }
+
+        .product-image {
+            height: 350px;
+            background: var(--color-cream);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Product Badge */
+        .badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 4px 8px;
+            border: 1px solid var(--color-gold);
+            color: var(--color-gold);
+        }
+
+        .product-info { text-align: left; }
+        .product-name { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; margin-bottom: 5px; }
+        .product-notes { font-size: 0.85rem; color: var(--color-graphite); margin-bottom: 15px; font-style: italic; }
+        
+        .product-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--color-parchment);
+            padding-top: 15px;
+        }
+
+        .price { font-family: 'Crimson Pro', serif; font-weight: 600; font-size: 1.1rem; }
+        .add-btn { 
+            background: none; border: none; cursor: pointer; color: var(--color-ink); 
+            font-family: 'Great Vibes', cursive; font-size: 1.5rem; transition: color 0.3s;
+        }
+        .add-btn:hover { color: var(--color-gold); }
+
+        /* --- ALMANAC / FEATURES --- */
+        .almanac {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            padding: 100px 0;
+            margin-bottom: 100px;
+        }
+        .almanac-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            text-align: center;
+        }
+        .almanac-item h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--color-gold); margin-bottom: 10px; }
+        .almanac-item p { color: var(--color-graphite); opacity: 0.7; font-size: 0.9rem; }
+
+        /* --- FOOTER / COLOPHON --- */
+        footer {
+            border-top: 4px double var(--color-parchment);
+            padding: 80px 0 40px;
+            text-align: center;
+        }
+
+        .colophon {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .colophon-col h4 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--color-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .colophon-col ul { list-style: none; }
+        .colophon-col li { margin-bottom: 10px; font-size: 0.9rem; color: var(--color-graphite); }
+        
+        .sg-context {
+            font-size: 0.8rem;
+            color: var(--color-graphite);
+            opacity: 0.6;
+            margin-top: 40px;
+            font-family: 'Crimson Pro', serif;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .hero { grid-template-columns: 1fr; text-align: center; }
+            .hero-text h1 { font-size: 3.5rem; }
+            .hero-text p { margin: 0 auto 30px; }
+            .hero-visual { height: 300px; order: -1; margin-bottom: 40px; }
+            .product-grid { grid-template-columns: 1fr; }
+            .almanac-grid { grid-template-columns: 1fr 1fr; }
+            .colophon { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ORNAMENTAL HEADER -->
+    <header>
+        <div class="container">
+            <span class="font-script" style="font-size: 2rem; display: block; margin-bottom: 10px;">Est. MMXXIV</span>
+            <a href="#" class="brand-logo">Atelier Arôme</a>
+            <nav>
+                <ul>
+                    <li><a href="#">Collections</a></li>
+                    <li><a href="#">The Alchemist</a></li>
+                    <li><a href="#">Journal</a></li>
+                    <li><a href="#">Cart (0)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- HERO SECTION: THE INVOCATION -->
+        <section class="hero">
+            <div class="hero-text">
+                <p class="font-script" style="color: var(--color-botanical); font-size: 1.5rem;">Artisanal Aromatherapy</p>
+                <h1>Awaken the <br>Senses</h1>
+                <p class="drop-cap">
+                    Curated botanical essences distilled for the modern soul. 
+                    Drawing upon centuries of apothecary wisdom, Atelier Arôme 
+                    bridges the gap between ancient alchemy and contemporary well-being.
+                    Experience the purity of nature, illuminated.
+                </p>
+                <a href="#collection" class="cta-btn">Explore The Collection</a>
+            </div>
+            
+            <div class="hero-visual">
+                <!-- Simulated Botanical Illustration -->
+                <div class="botanical-art">
+                    <div class="leaf leaf-1"></div>
+                    <div class="leaf leaf-2"></div>
+                    <div class="leaf leaf-3"></div>
+                    <!-- Central Circle (Sun/Moon) -->
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150px; height: 150px; border: 1px solid var(--color-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span class="font-script" style="font-size: 2rem;">Aa</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CURATED COLLECTION -->
+        <section id="collection" class="ornamental-border">
+            <div class="section-header">
+                <p class="font-script">The Apothecary's Choice</p>
+                <h2>Curated Essences</h2>
+                <div style="width: 60px; height: 2px; background: var(--color-gold); margin: 20px auto;"></div>
+            </div>
+
+            <div class="product-grid">
+                <!-- Product 1 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <span class="badge">Bestseller</span>
+                        <!-- Placeholder for Image -->
+                        <div style="font-family: 'Cormorant Garamond'; font-size: 4rem; color: var(--color-parchment);">I</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Santalum Noir</h3>
+                        <p class="product-notes">Mysore Sandalwood, Amber, Smoked Vetiver</p>
+                        <div class="product-footer">
+                            <span class="price">$85.00</span>
+                            <button class="add-btn">Add to Vial</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <div style="font-family: 'Cormorant Garamond'; font-size: 4rem; color: var(--color-parchment);">II</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Bergamot Mist</h3>
+                        <p class="product-notes">Calabrian Bergamot, Sea Salt, White Musk</p>
+                        <div class="product-footer">
+                            <span class="price">$72.00</span>
+                            <button class="add-btn">Add to Vial</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <span class="badge" style="border-color: var(--color-botanical); color: var(--color-botanical);">Organic</span>
+                        <div style="font-family: 'Cormorant Garamond'; font-size: 4rem; color: var(--color-parchment);">III</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Oud Mystique</h3>
+                        <p class="product-notes">Agarwood, Rose Absolute, Black Pepper</p>
+                        <div class="product-footer">
+                            <span class="price">$120.00</span>
+                            <button class="add-btn">Add to Vial</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- THE ALCHEMIST / VALUES -->
+        <section class="almanac">
+            <div class="container">
+                <div class="section-header" style="margin-bottom: 40px;">
+                    <h2 style="color: var(--color-paper);">Our Craft</h2>
+                </div>
+                <div class="almanac-grid">
+                    <div class="almanac-item">
+                        <h3>01. Harvest</h3>
+                        <p>Sourced directly from sustainable farms in Grasse and Provence.</p>
+                    </div>
+                    <div class="almanac-item">
+                        <h3>02. Distill</h3>
+                        <p>Slow hydro-distillation to preserve delicate molecular structures.</p>
+                    </div>
+                    <div class="almanac-item">
+                        <h3>03. Age</h3>
+                        <p>Essences matured in glazed ceramic vessels for 6 months.</p>
+                    </div>
+                    <div class="almanac-item">
+                        <h3>04. Blend</h3>
+                        <p>Hand-mixed by our Master Perfumer in small batches.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER / COLOPHON -->
+    <footer>
+        <div class="container">
+            <div class="colophon">
+                <div class="colophon-col">
+                    <h4>Atelier Arôme</h4>
+                    <p style="color: var(--color-graphite); font-size: 0.9rem;">
+                        A sanctuary for the senses. <br>
+                        Redefining luxury through the lens <br>of heritage and nature.
+                    </p>
+                </div>
+                <div class="colophon-col">
+                    <h4>Customer Care</h4>
+                    <ul>
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">Track Order (SingPost)</a></li>
+                        <li><a href="#">Ingredient Glossary</a></li>
+                        <li><a href="#">Contact the Alchemist</a></li>
+                    </ul>
+                </div>
+                <div class="colophon-col">
+                    <h4>Newsletter</h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 15px; color: var(--color-graphite);">Join our guild for first access to limited editions.</p>
+                    <div style="display: flex; border-bottom: 1px solid var(--color-ink);">
+                        <input type="email" placeholder="Email Address" style="border: none; background: transparent; font-family: 'Crimson Pro'; padding: 10px 0; width: 100%; outline: none;">
+                        <button style="background: none; border: none; font-family: 'Crimson Pro'; font-weight: bold; cursor: pointer;">JOIN</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sg-context">
+                <p>&copy; MMXXIV Atelier Arôme Singapore. All Rights Reserved.</p>
+                <p>Prices are in Singapore Dollars (SGD). Inclusive of 9% GST.</p>
+                <p>Architecture powered by Laravel 12 & Next.js 15.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
