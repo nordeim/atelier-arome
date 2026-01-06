@@ -1298,10 +1298,46 @@ If you'd like, I can now:
 
 I created the complete token-governance package and tooling in the canvas (file: **Improvement-1-token-governance**). It includes schema, example tokens, TypeScript scripts to validate tokens and generate CSS/Tailwind fragments, a CI workflow, and usage notes.
 
-Next steps available (pick any):
+Next steps available:
 
 * Convert the TypeScript scripts to plain JS (for simpler setups).
 * Produce the `tailwind.config.js` import snippet and a ready-to-drop `global.css` that imports the generated `tokens.css`.
 * Add a CI enhancement that prints a color-contrast matrix in the job logs.
 
-Which one should I produce next?
+---
+
+# Tailwind Config + Global CSS
+
+This canvas contains the ready-to-drop **`tailwind.config.js`** snippet and a production-ready **`global.css`** that imports the generated `tokens.css` from `packages/design-tokens`. Place these files in your Next.js app root (or workspace root) and follow the usage steps below.
+
+---
+
+## Files included in this document
+
+1. `tailwind.config.js` — import the generated `tailwind.tokens.fragment.js` and merge tokens into the Tailwind theme; includes recommended `content` globs and plugins.
+2. `styles/global.css` — imports Google Fonts (as used in the mockup), imports the generated `packages/design-tokens/tokens.css`, includes Tailwind directives, and contains a set of global utilities (parchment background, drop-cap, reduced-motion handling, wax-seal utility) tuned for the Atelier Arôme aesthetic.
+
+---
+
+## Where to put them
+
+* `tailwind.config.js` → `/apps/next-frontend/tailwind.config.js` (or repo root if single-app)
+* `global.css` → `/apps/next-frontend/styles/global.css`
+
+If your workspaces differ, adjust the import path to `packages/design-tokens/tokens.css` in `global.css` accordingly.
+
+---
+
+## How to use (quick)
+
+1. Ensure `pnpm tokens:generate` has run and `tailwind.tokens.fragment.js` and `packages/design-tokens/tokens.css` exist.
+2. Place `tailwind.config.js` in your Next.js app root.
+3. Place `global.css` in your app's styles folder and import it from your root layout (`app/layout.tsx` or `_app.tsx`) via `import '../styles/global.css'`.
+4. Run your Next.js dev server (`pnpm dev`) and verify token classes (e.g., `bg-parchment`, `text-ink`, `font-display`) are available.
+
+---
+
+Done — I created the **Tailwind config import snippet** and the **ready-to-drop `global.css`** in the canvas (document: **Tailwind-config-and-global-css**). It includes placement guidance and a short usage checklist so you can run the token-generation scripts and immediately see the theme in your Next.js app.
+
+---
+
