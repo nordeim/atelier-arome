@@ -9,7 +9,14 @@ export function HeroSection() {
       <div className="grid md:grid-cols-2 gap-12 items-center min-h-[80vh]">
         <div className="space-y-8">
           <div className="relative">
-            <span className="text-8xl md:text-9xl font-display font-bold text-gold drop-shadow-lg">
+            <svg className="absolute -top-8 -left-8 w-32 h-32 text-gold opacity-30" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="2" />
+              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="1" />
+              <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" />
+              <path d="M50,5 L50,15 M50,85 L50,95 M5,50 L15,50 M85,50 L95,50" stroke="currentColor" strokeWidth="1" />
+              <path d="M20,20 L27,27 M73,73 L80,80 M20,80 L27,73 M73,27 L80,20" stroke="currentColor" strokeWidth="1" />
+            </svg>
+            <span className="text-8xl md:text-9xl font-display font-bold text-gold drop-shadow-lg relative z-10">
               A
             </span>
             <span className="absolute -top-4 -left-4 text-6xl md:text-7xl font-display text-gold opacity-40">

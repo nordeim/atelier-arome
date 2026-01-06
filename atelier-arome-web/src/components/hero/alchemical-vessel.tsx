@@ -18,7 +18,11 @@ export function AlchemicalVessel() {
         />
         <circle cx="80" cy="160" r="4" fill="#E8B4B8" className="animate-bubble-rise" />
         <circle cx="120" cy="155" r="3" fill="#F5D489" className="animate-bubble-rise" style={{ animationDelay: '0.5s' }} />
+        <circle cx="100" cy="165" r="2" fill="#F5D489" className="animate-bubble-rise" style={{ animationDelay: '1s' }} />
       </svg>
+      <div className="absolute top-[55%] left-1/2 transform -translate-x-1/2 text-gold font-display text-sm">
+        <span className="text-xs">N°</span> 724
+      </div>
       <div className="absolute inset-0 bg-gold opacity-10 blur-3xl rounded-full animate-pulse" />
     </div>
   );

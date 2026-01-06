@@ -35,9 +35,9 @@ const config: Config = {
       },
       
       fontFamily: {
-        display: ['Cormorant Garamond', 'Georgia', 'serif'],
-        body: ['Crimson Pro', 'Georgia', 'serif'],
-        accent: ['Great Vibes', 'cursive'],
+        display: ['var(--font-display)', 'Cormorant Garamond', 'Georgia', 'serif'],
+        body: ['var(--font-body)', 'Crimson Pro', 'Georgia', 'serif'],
+        accent: ['var(--font-accent)', 'Great Vibes', 'cursive'],
         ornament: ['Playfair Display', 'serif'],
       },
       
@@ -122,11 +122,6 @@ const config: Config = {
         'pulse': {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
           '50%': { opacity: '0.7', transform: 'scale(1.05)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
-        'seal-rotate': {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
         },
         'liquid-sway': {
           '0%, 100%': { transform: 'translateX(0)' },
@@ -143,6 +138,7 @@ const config: Config = {
       },
       animation: {
         'seal-rotate': 'seal-rotate 30s linear infinite',
+        'rotate-seal': 'rotate-seal 3s ease-in-out infinite',
         'liquid-sway': 'liquid-sway 3s ease-in-out infinite',
         'bubble-rise': 'bubble-rise 2s ease-out infinite',
         'float': 'float 6s ease-in-out infinite',
