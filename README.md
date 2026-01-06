@@ -231,19 +231,43 @@ atelier-arome-web/
 │   │   ├── error.tsx                   # Error boundary
 │   │   └── not-found.tsx              # 404 page
 │   ├── components/
-│   │   ├── ui/                         # Shadcn-UI components (button, card, dialog, etc.)
-│   │   ├── providers/                   # React providers (Query, Theme, Toast)
-│   │   └── ...
+│   │   ├── ui/                         # Shadcn-UI primitives
+│   │   │   └── sheet.tsx               # Radix Dialog wrapper with parchment styling
+│   │   ├── hero/                       # Atomic hero components
+│   │   │   ├── hero-frame.tsx          # Layout + border ornaments
+│   │   │   ├── alchemical-vessel.tsx    # Vessel + liquid animation
+│   │   │   ├── botanical-layer.tsx      # Parallax botanical elements
+│   │   │   └── hero-section.tsx       # Orchestrator component
+│   │   ├── layout/                     # Orchestrator components
+│   │   │   └── header.tsx             # Navigation + seal animation
+│   │   └── providers/                   # React providers (Query, Theme, Toast)
 │   ├── hooks/                           # Custom React hooks
-│   ├── lib/                             # Utilities (API client, formatters)
-│   ├── stores/                          # Zustand stores (cart, UI state)
+│   ├── lib/                             # Utilities (cn(), API client)
+│   │   └── utils.ts                   # Tailwind class merge utility
+│   ├── stores/                          # Zustand stores
+│   │   └── cart-store.ts              # Cart state with persistence
 │   └── types/                           # TypeScript type definitions
 ├── public/                              # Static assets
 ├── .env.local.example                   # Environment variables template
 ├── next.config.ts                      # Next.js configuration (images, headers)
-├── tailwind.config.ts                   # Tailwind theme (Illuminated Manuscript)
+├── tailwind.config.ts                   # Tailwind theme (Illuminated Manuscript + animations)
 ├── tsconfig.json                        # TypeScript configuration
 └── package.json                         # Node.js dependencies
+```
+
+**Component Architecture:**
+```
+Atomic Components (60-120 lines)
+├── hero-frame.tsx          # Layout + gold-leaf borders
+├── alchemical-vessel.tsx    # SVG vessel + CSS animations
+└── botanical-layer.tsx      # Parallax botanical elements
+
+Orchestrator Components (100-150 lines)
+├── hero-section.tsx         # Composes atomic + typography + actions
+└── header.tsx             # Navigation + mobile menu + cart
+
+State Management (Zustand)
+└── cart-store.ts           # Cart state + localStorage persistence
 ```
 
 ### Root Directory
@@ -720,6 +744,140 @@ src/
 
 ---
 
+## 🔧 Troubleshooting
+
+### Build Errors
+
+**JSX Syntax Errors**
+
+**Symptom:**
+```
+Error: x Expression expected
+     ,-[/src/app/page.tsx:285:1]
+285 |                       </button>
+     :                 ^
+```
+
+**Cause:** Unclosed JSX tags or template literal backticks in attributes
+
+**Solution:** "Construct and Conquer" Strategy
+1. Create new clean component files
+2. Write semantic HTML + Tailwind (no template literals in JSX)
+3. Overwrite broken page.tsx with new structure
+4. Run `pnpm run build`
+
+**Example:**
+```bash
+# Step 1: Create component
+mkdir -p src/components/hero
+touch src/components/hero/hero-frame.tsx
+
+# Step 2: Write clean JSX
+export function HeroFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="bg-parchment border-2 border-gold">
+      {children}
+    </section>
+  );
+}
+
+# Step 3: Overwrite page
+cp src/app/page.tsx src/app/page.tsx.backup
+# Write clean page.tsx importing new component
+```
+
+**Module Not Found Errors**
+
+**Symptom:**
+```
+Module not found: Can't resolve '@/components/ui/sheet'
+```
+
+**Solution:**
+```bash
+# Option 1: Generate with CLI
+npx shadcn-ui@latest add sheet
+
+# Option 2: Create manually
+touch src/components/ui/sheet.tsx
+
+# Copy Radix Dialog primitive from Shadcn docs
+# Apply parchment styling (bg-parchment, border-gold, backdrop-blur-sm)
+```
+
+**Font Loading Issues**
+
+**Symptom:** Typography reverts to generic sans-serif
+
+**Solution:** Add font loading to layout.tsx
+```typescript
+import { Cormorant_Garamond, Crimson_Pro, Great_Vibes } from 'next/font/google';
+
+const cormorant = Cormorant_Garamond({
+  weight: ['300', '400', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-cormorant',
+});
+
+const crimson = Crimson_Pro({
+  weight: ['300', '400', '600'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-crimson',
+});
+
+// Apply to body: className={`${cormorant.variable} ${crimson.variable}`}
+```
+
+### Animation Issues
+
+**Tailwind Animations Not Applying**
+
+**Symptom:** Custom animation classes not recognized
+
+**Cause:** Animation defined in globals.css instead of tailwind.config.ts
+
+**Solution:**
+```typescript
+// tailwind.config.ts
+export default {
+  theme: {
+    extend: {
+      keyframes: {
+        'seal-rotate': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+      },
+      animation: {
+        'seal-rotate': 'seal-rotate 30s linear infinite',
+      },
+    },
+  },
+};
+```
+
+### Development Workflow
+
+**"Construct and Conquer" (Build Remediation)**
+
+When encountering JSX/build errors:
+1. ✅ Create new component files (clean slate)
+2. ✅ Write semantic HTML + Tailwind utilities
+3. ✅ Overwrite broken file (don't debug line-by-line)
+4. ✅ Run `pnpm run build` to verify
+5. ✅ Test in dev server
+
+**Common Pitfalls:**
+- ❌ Debugging line-by-line (wastes time)
+- ❌ Fixing template literals in broken file (risk of cascade errors)
+- ❌ Adding animations to globals.css (not Tailwind-compliant)
+- ✅ Creating clean components (atomic design pattern)
+- ✅ Using Tailwind animation utilities (defined in tailwind.config.ts)
+
+---
+
 ## 📚 API Documentation
 
 ### Authentication Endpoints
@@ -921,7 +1079,7 @@ UPSTASH_REDIS_REST_URL=...
 
 ## 🗺️ Roadmap
 
-### Current Status: Phase 1 Complete ✅
+### Current Status: Phase 3 Complete ✅
 
 - [x] Project structure created
 - [x] Database schema designed (24 tables)
@@ -930,6 +1088,12 @@ UPSTASH_REDIS_REST_URL=...
 - [x] Next.js 15 frontend initialized
 - [x] Docker infrastructure configured
 - [x] Illuminated Manuscript design system created
+- [x] Atomic component architecture established
+- [x] Zustand cart store with persistence
+- [x] Tailwind animation utilities configured
+- [x] Build error resolved (JSX syntax elimination)
+- [x] Zero TypeScript errors, Zero ESLint warnings
+- [x] Dev server running on http://localhost:3000
 
 ### Upcoming Phases
 

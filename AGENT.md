@@ -85,6 +85,60 @@ atelier-arome/
 
 ---
 
+## Component Architecture
+
+### Atomic Design Pattern
+
+The frontend uses an **atomic component architecture** for maintainability and scalability:
+
+```
+src/components/
+├── hero/                      # Atomic hero components
+│   ├── hero-frame.tsx          # Layout + border ornaments (80 lines)
+│   ├── alchemical-vessel.tsx    # Vessel + liquid animation (120 lines)
+│   └── botanical-layer.tsx      # Parallax botanical elements (60 lines)
+├── layout/                    # Orchestrator components
+│   └── header.tsx             # Navigation + seal animation (150 lines)
+└── ui/                        # Shadcn-UI primitives
+    ├── sheet.tsx              # Radix Dialog wrapper
+    ├── button.tsx
+    └── ...
+```
+
+**Atomic Components (Single Responsibility):**
+- `hero-frame.tsx` - Layout frame with gold-leaf border corners
+- `alchemical-vessel.tsx` - SVG vessel with CSS animations
+- `botanical-layer.tsx` - Parallax botanical elements
+
+**Orchestrator Components (Composition):**
+- `hero-section.tsx` - Composes atomic components, typography, actions
+- `header.tsx` - Navigation, mobile menu, cart integration
+
+**State Management (Zustand):**
+```typescript
+// src/stores/cart-store.ts
+export const useCartStore = create<CartState>()(
+  persist(
+    (set) => ({
+      items: [],
+      cartDrawerOpen: false,
+      addToCart: (item) => { /* ... */ },
+      removeFromCart: (id) => { /* ... */ },
+      // ...
+    }),
+    { name: 'atelier-arome-cart' }
+  )
+);
+```
+
+**Key Principles:**
+1. **Atomicity:** Each component has single responsibility (~60-150 lines)
+2. **Composition:** Orchestrators compose atomic components
+3. **Isolation:** Components can be tested in isolation
+4. **Styling:** Tailwind utilities (not inline styles or globals.css)
+
+---
+
 ## Development Workflow
 
 ### Backend (Laravel API)
@@ -204,6 +258,67 @@ pnpm storybook           # Start Storybook dev server
 npx shadcn-ui@latest add button
 npx shadcn-ui@latest add card
 ```
+
+---
+
+### Frontend Component Workflow
+
+**Best Practices:**
+
+1. **"Construct and Conquer"** (Not "Patch and Fix")
+   - Create new component files with clean structure
+   - Delete broken code, don't debug it
+   - Build new, then integrate
+
+2. **Atomic First, Then Orchestrate**
+   - Start with atomic component (single responsibility)
+   - Test in isolation
+   - Compose into orchestrator
+
+3. **Shadcn Component Creation**
+   ```bash
+   # Generate base component
+   npx shadcn-ui@latest add sheet
+   
+   # Customize with Illuminated Manuscript theme
+   # Edit src/components/ui/sheet.tsx:
+   # - Change bg-background to bg-parchment
+   # - Change border to border-gold
+   # - Add backdrop-blur-sm
+   ```
+
+4. **Animation Utilities (Tailwind)**
+   ```typescript
+   // tailwind.config.ts
+   theme: {
+     extend: {
+       animation: {
+         'seal-rotate': 'seal-rotate 30s linear infinite',
+         'liquid-sway': 'liquid-sway 3s ease-in-out infinite',
+         'bubble-rise': 'bubble-rise 2s ease-out infinite',
+         'float': 'float 6s ease-in-out infinite',
+       },
+       keyframes: {
+         'seal-rotate': {
+           '0%': { transform: 'rotate(0deg)' },
+           '100%': { transform: 'rotate(360deg)' },
+         },
+         // ...
+       },
+     },
+   }
+   
+   // Usage in component
+   <div className="animate-seal-rotate">
+   ```
+
+5. **Testing Strategy**
+   ```bash
+   # After creating component:
+   pnpm type-check  # TypeScript validation
+   pnpm run build    # Build verification
+   pnpm dev         # Dev server verification
+   ```
 
 ---
 
@@ -432,7 +547,70 @@ export default {
   },
 };
 ```
+ 
+### Custom Animations (Tailwind)
 
+**Animation Utilities:**
+
+```typescript
+// tailwind.config.ts
+animation: {
+  'seal-rotate': 'seal-rotate 30s linear infinite',
+  'liquid-sway': 'liquid-sway 3s ease-in-out infinite',
+  'bubble-rise': 'bubble-rise 2s ease-out infinite',
+  'float': 'float 6s ease-in-out infinite',
+}
+
+keyframes: {
+  'seal-rotate': {
+    '0%': { transform: 'rotate(0deg)' },
+    '100%': { transform: 'rotate(360deg)' },
+  },
+  'liquid-sway': {
+    '0%, 100%': { transform: 'translateX(0)' },
+    '50%': { transform: 'translateX(5px)' },
+  },
+  'bubble-rise': {
+    '0%': { transform: 'translateY(0)', opacity: '1' },
+    '100%': { transform: 'translateY(-40px)', opacity: '0' },
+  },
+  'float': {
+    '0%, 100%': { transform: 'translateY(0)' },
+    '50%': { transform: 'translateY(-20px)' },
+  },
+}
+```
+
+**Usage in Components:**
+```typescript
+// Hero seal animation
+<div className="animate-seal-rotate">
+  <svg>...</svg>
+</div>
+
+// Vessel liquid animation
+<svg>
+  <path className="animate-liquid-sway" ... />
+</svg>
+
+// Botanical parallax
+<div className="animate-float" style={{ animationDelay: '0s' }}>
+  <svg>...</svg>
+</div>
+```
+
+**Accessibility (Reduced Motion):**
+```css
+/* globals.css */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+ 
 ### Accessibility Requirements
 
 **WCAG AA minimum, AAA target:**
@@ -850,6 +1028,144 @@ images: {
 'supports_credentials' => true,
 ```
 
+### Frontend Build Errors
+
+**1. JSX Syntax Errors (Unclosed Tags, Template Literals)**
+
+**Problem:**
+```
+Error: x Expression expected
+     ,-[/src/app/page.tsx:285:1]
+285 |                       </button>
+     :                 ^
+```
+
+**Cause:** Malformed JSX or template literal backticks mixed with tags
+
+**Solution:** "Construct and Conquer" strategy
+```bash
+# DON'T: Debug line-by-line (waste of time)
+# DO: Create clean component, then overwrite
+
+# Step 1: Create new component
+mkdir -p src/components/hero
+touch src/components/hero/hero-frame.tsx
+
+# Step 2: Write clean JSX (no backticks in attributes)
+export function HeroFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="bg-parchment">
+      {children}
+    </section>
+  );
+}
+
+# Step 3: Overwrite broken page
+cp src/app/page.tsx src/app/page.tsx.backup
+echo "import { HeroFrame } from '@/components/hero/hero-frame';" > src/app/page.tsx
+```
+
+**2. Shadcn Component Missing**
+
+**Problem:**
+```
+Module not found: Can't resolve '@/components/ui/sheet'
+```
+
+**Cause:** Component not created via CLI or manually
+
+**Solution:**
+```bash
+# Option 1: Use CLI
+npx shadcn-ui@latest add sheet
+
+# Option 2: Create manually
+touch src/components/ui/sheet.tsx
+
+# Copy Radix primitive from documentation
+# Apply parchment styling:
+# - SheetContent: className="bg-parchment border-l-2 border-gold"
+# - SheetOverlay: className="bg-black/40 backdrop-blur-sm"
+```
+
+**3. Font Loading Issues**
+
+**Problem:**
+```
+Typography reverts to generic sans-serif
+```
+
+**Cause:** CSS variables defined but fonts not loaded
+
+**Solution:**
+```typescript
+// src/app/layout.tsx
+import { Cormorant_Garamond, Crimson_Pro, Great_Vibes } from 'next/font/google';
+
+const cormorant = Cormorant_Garamond({
+  weight: ['300', '400', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+const crimson = Crimson_Pro({
+  weight: ['300', '400', '600'],
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+const greatVibes = Great_Vibes({
+  weight: ['400'],
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body className={`${cormorant.variable} ${crimson.variable}`}>
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+**4. Tailwind Animation Not Working**
+
+**Problem:**
+```
+Custom animation classes not applying
+```
+
+**Cause:** Animation defined in globals.css, not tailwind.config.ts
+
+**Solution:**
+```typescript
+// ❌ BAD: globals.css
+@keyframes seal-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// ✅ GOOD: tailwind.config.ts
+export default {
+  theme: {
+    extend: {
+      keyframes: {
+        'seal-rotate': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+      },
+      animation: {
+        'seal-rotate': 'seal-rotate 30s linear infinite',
+      },
+    },
+  },
+};
+```
+
 ---
 
 ## Key Documentation Files
@@ -865,7 +1181,7 @@ images: {
 
 ## Phase Status
 
-**Current Phase:** Phase 1 Complete ✅ → Phase 2 Ready ⏳
+**Current Phase:** Phase 3 Complete ✅ → Phase 4 Ready ⏳
 
 **Phase 1 (Foundation) - 100% Complete ✅:**
 - [x] Create `atelier-arome-api/` Laravel 12 project ✅
@@ -880,6 +1196,17 @@ images: {
 - [x] App Router structure created with route groups ✅
 - [x] Frontend build successful and dev server running ✅
 - [x] Backend API server running and tested ✅
+
+**Phase 3 (Frontend Foundation) - 100% Complete ✅:**
+- [x] Atomic component architecture established (hero-frame, alchemical-vessel, botanical-layer) ✅
+- [x] Orchestrator components created (hero-section, header) ✅
+- [x] Zustand cart store with localStorage persistence ✅
+- [x] Shadcn Sheet component with parchment styling ✅
+- [x] Tailwind animation utilities configured (seal-rotate, liquid-sway, bubble-rise, float) ✅
+- [x] Build error resolved (JSX syntax elimination via "Construct and Conquer") ✅
+- [x] Zero TypeScript errors ✅
+- [x] Zero ESLint warnings ✅
+- [x] Dev server running on http://localhost:3000 ✅
 
 **Phase 2 (Backend Core) - Ready to Begin ⏳:**
 - [ ] Refine all 22 Eloquent models with complete relationships
