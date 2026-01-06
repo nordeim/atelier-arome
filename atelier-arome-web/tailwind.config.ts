@@ -124,6 +124,28 @@ const config: Config = {
           '50%': { opacity: '0.7', transform: 'scale(1.05)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        'seal-rotate': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        'liquid-sway': {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '50%': { transform: 'translateX(5px)' },
+        },
+        'bubble-rise': {
+          '0%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(-40px)', opacity: '0' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+      },
+      animation: {
+        'seal-rotate': 'seal-rotate 30s linear infinite',
+        'liquid-sway': 'liquid-sway 3s ease-in-out infinite',
+        'bubble-rise': 'bubble-rise 2s ease-out infinite',
+        'float': 'float 6s ease-in-out infinite',
       },
     },
   },
