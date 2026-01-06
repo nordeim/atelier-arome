@@ -1341,3 +1341,112 @@ Done — I created the **Tailwind config import snippet** and the **ready-to-dro
 
 ---
 
+# Next.js 15 + Tailwind 4 — Minimal `next.config.js` and `postcss.config.js`
+
+This document contains a minimal, production-oriented `next.config.js` and `postcss.config.js` tuned for **Next.js 15** + **Tailwind CSS v4**, suitable for the Atelier Arôme monorepo structure (Next app in `apps/next-frontend` and local packages in `/packages`).
+
+Place these files in your Next app root (e.g. `/apps/next-frontend/next.config.js` and `/apps/next-frontend/postcss.config.js`). If your Next app lives at repository root, place them there instead.
+
+---
+
+## `next.config.js` (CommonJS) — /apps/next-frontend/next.config.js
+
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  swcMinify: true,
+  // Produces a standalone build output which is easier to deploy from a monorepo
+  output: 'standalone',
+
+  // Monorepo: transpile local packages that export raw ES/TS source
+  // Replace with your workspace package names (e.g. '@atelier/ui') as needed
+  transpilePackages: [
+    'packages/ui',
+    'packages/design-tokens'
+  ],
+
+  // Image optimization: prefer `remotePatterns` (domains is deprecated in newer versions)
+  images: {
+    remotePatterns: [
+      // Cloudinary (example) — adjust to your actual image host
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      // Example: external imagery you might use for mockups
+      { protocol: 'https', hostname: 'images.unsplash.com' }
+    ],
+    // Keep a small TTL for previews during development
+    minimumCacheTTL: 60
+  },
+
+  // Recommended: restrict ESLint to relevant directories
+  eslint: {
+    dirs: ['app', 'src', 'pages']
+  }
+};
+
+module.exports = nextConfig;
+```
+
+**Notes & rationale**
+
+* `output: 'standalone'` helps deploy a single app from a monorepo without shipping the entire repository. Useful for Vercel or custom serverless setups. (See Next.js docs for `output` details.)
+* `transpilePackages` avoids `next-transpile-modules` and lets Next bundle local packages' source. Replace the array items with your actual package names (e.g. `@atelier/ui`) or keep path form if you prefer.
+* Use `remotePatterns` instead of `domains` to allow Cloudinary or other CDNs as image sources.
+
+---
+
+## `postcss.config.js` (CommonJS) — /apps/next-frontend/postcss.config.js
+
+```js
+/**
+ * Minimal PostCSS config for Tailwind v4
+ * - `postcss-import` is kept here to ensure `@import` works when needed
+ * - `@tailwindcss/postcss` is the Tailwind v4 PostCSS plugin
+ */
+module.exports = {
+  plugins: {
+    'postcss-import': {},
+    '@tailwindcss/postcss': {}
+  }
+};
+```
+
+**Alternative (ESM)**
+If your build tool expects an ESM config (`.mjs`), use the following in `postcss.config.mjs`:
+
+```js
+export default {
+  plugins: {
+    'postcss-import': {},
+    '@tailwindcss/postcss': {}
+  }
+}
+```
+
+---
+
+## Integration checklist (quick)
+
+* [ ] Run `pnpm tokens:generate` (generates `tailwind.tokens.fragment.js` and `packages/design-tokens/tokens.css`).
+* [ ] Place `next.config.js` and `postcss.config.js` into your Next.js app root.
+* [ ] Ensure your `tailwind.config.js` requires the generated fragment, e.g. `const tokens = require('../../tailwind.tokens.fragment.js');` (path as appropriate).
+* [ ] Import `global.css` (which imports the generated tokens CSS and `@import 'tailwindcss';`) into your `app/layout.tsx` or `_app.tsx`.
+* [ ] Start dev server: `pnpm dev` — verify Tailwind utilities, fonts, and token-based CSS variables are available.
+
+---
+
+## Optional production hardening (recommended later)
+
+* Add `outputFileTracingRoot` to `next.config.js` when producing the standalone build from a workspace root to ensure only required files are included.
+* Add `experimental: { typedRoutes: true }` only if you opt into route type generation — check Next.js docs and your version compatibility.
+* If you rely on image loaders or remote patterns that require a custom loader function, consider moving that logic into client components (Next.js requirement in some cases).
+
+---
+
+Done — I created the minimal `next.config.js` and `postcss.config.js` (with an ESM alternative and guidance) in the canvas (document: **Next-postcss-configs**). They’re tuned for Next.js 15 + Tailwind 4, include monorepo/transpile guidance, and use `remotePatterns` for modern image configuration.
+
+Next:
+
+* Generate `app/layout.tsx` that preloads Google Fonts and imports `global.css`, or
+* Convert these configs to strict ESM `.mjs` files and add `outputFileTracingRoot` and `experimental` options for standalone monorepo builds.
+
