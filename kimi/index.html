@@ -30,7 +30,6 @@
       --ultramarine: #12324B;
 
       /* Typography (Fluid Scale, Major Third: 1.25 ratio) */
-      /* All calculations: clamp(min, min + (max-min) * ((100vw - 320px) / (1440 - 320)), max) */
       --text-xs: clamp(0.69rem, 0.66rem + 0.17vw, 0.79rem);
       --text-sm: clamp(0.83rem, 0.79rem + 0.21vw, 0.96rem);
       --text-base: clamp(1.00rem, 0.95rem + 0.26vw, 1.20rem);
@@ -40,15 +39,11 @@
       --text-3xl: clamp(2.07rem, 1.97rem + 0.54vw, 2.49rem);
       --text-4xl: clamp(2.49rem, 2.37rem + 0.65vw, 2.99rem);
 
-      /* Manuscript Grid (Asymmetric Margins - CORRECTED) */
-      --binding-margin: clamp(2rem, 4vw, 4rem); /* Binding side margin */
-      --gutter-margin: clamp(1rem, 2vw, 2rem);  /* Inner gutter margin */
+      /* Manuscript Grid (Asymmetric Margins) */
+      --margin-outside: 8vw; /* Outer margin for binding side */
+      --margin-inside: 3vw;  /* Inner margin for gutter */
       --text-block: min(65ch, 60vw);
-      
-      /* Layout Dimensions (FIXED PROPORTIONS) */
-      --nav-width: clamp(16rem, 20vw, 20rem); /* Fixed navigation width */
-      --spine-width: 1.5rem; /* Decorative spine width (24px) */
-      --content-min-width: 20rem; /* Minimum content width */
+      --spine-width: 4vw; /* Now decorative width only */
 
       /* Spacing Scale (4px baseline grid) */
       --space-1: 0.25rem;  /* 4px */
@@ -60,16 +55,14 @@
       --space-12: 3rem;    /* 48px */
       --space-16: 4rem;    /* 64px */
 
+      /* Navigation Width */
+      --nav-width: clamp(240px, 22vw, 320px);
+
       /* Transitions (Respect reduced motion) */
       --duration-fast: 150ms;
       --duration-medium: 300ms;
       --duration-slow: 600ms;
       --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-      
-      /* Z-index layers */
-      --z-navigation: 100;
-      --z-overlay: 900;
-      --z-modal: 1000;
     }
 
     /* High Contrast Preference (WCAG AAA Enhanced) */
@@ -175,7 +168,7 @@
     }
 
     /* =========================================================================
-       Phase 2: Layout & Navigation – "The Table of Contents" (RECONSTRUCTED)
+       PHASE 2: LAYOUT ARCHITECTURE – REVISED GRID SYSTEM
        ========================================================================= */
 
     /* Skip to main content link (accessibility) */
@@ -191,57 +184,91 @@
       transform: translateY(-100%);
       opacity: 0;
       transition: transform var(--duration-fast), opacity var(--duration-fast);
-      z-index: var(--z-modal);
     }
 
     .skip-link:focus {
       transform: translateY(0);
       opacity: 1;
+      z-index: 1000;
     }
 
-    /* Mobile Navigation Toggle */
-    .nav-toggle {
-      position: fixed;
-      top: var(--space-4);
-      left: var(--space-4);
-      z-index: var(--z-navigation);
-      background: var(--gold-base);
-      color: var(--ink);
-      border: none;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: transform var(--duration-fast);
+    /* =========================================================================
+       MAIN PAGE SPREAD – REVISED ARCHITECTURE
+       ========================================================================= */
+
+    .page-spread {
+      display: grid;
+      grid-template-columns: var(--nav-width) 1fr;
+      gap: 0;
+      min-height: 100vh;
+      position: relative;
     }
 
-    .nav-toggle:hover,
-    .nav-toggle:focus {
-      transform: scale(1.05);
+    /* Decorative Spine as Pseudo-element */
+    .page-spread::before {
+      content: "";
+      position: absolute;
+      left: calc(var(--nav-width) + var(--spine-width) / 2);
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--gold-mid) 20%,
+        var(--gold-mid) 80%,
+        transparent 100%
+      );
+      opacity: 0.4;
+      z-index: 10;
+      pointer-events: none;
     }
 
-    .nav-toggle:focus {
-      outline: 3px solid var(--gold-mid);
-      outline-offset: 2px;
+    /* Reduced motion: simpler spine */
+    @media (prefers-reduced-motion: reduce) {
+      .page-spread::before {
+        background: var(--gold-mid);
+        opacity: 0.2;
+      }
     }
 
-    /* Manuscript Table of Contents (Navigation) - FIXED WIDTH */
+    /* =========================================================================
+       NAVIGATION – CONTAINED & DYNAMIC
+       ========================================================================= */
+
     .manuscript-toc {
       position: sticky;
       top: 0;
       height: 100vh;
       width: var(--nav-width);
-      padding: var(--space-6) var(--gutter-margin);
-      border-right: 1px solid rgba(27, 26, 23, 0.08);
-      background: linear-gradient(90deg, var(--parchment) 0%, rgba(250, 245, 238, 0.95) 100%);
+      max-width: 100%;
+      padding: var(--space-8) var(--space-4) var(--space-8) var(--margin-outside);
+      background: linear-gradient(
+        90deg,
+        var(--parchment) 0%,
+        rgba(250, 245, 238, 0.97) 100%
+      );
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       overflow-y: auto;
-      z-index: var(--z-navigation);
-      contain: layout paint;
-      transition: transform var(--duration-medium) var(--easing-smooth);
+      z-index: 100;
+      border-right: 1px solid rgba(27, 26, 23, 0.08);
+      /* Custom scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-mid) transparent;
+    }
+
+    .manuscript-toc::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .manuscript-toc::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .manuscript-toc::-webkit-scrollbar-thumb {
+      background-color: var(--gold-mid);
+      border-radius: 4px;
     }
 
     .manuscript-toc ul {
@@ -251,109 +278,102 @@
     }
 
     .manuscript-toc li {
-      margin-bottom: var(--space-3);
+      margin-bottom: var(--space-2);
     }
 
     .manuscript-toc a {
       display: block;
-      padding: var(--space-2) var(--space-4);
+      padding: var(--space-3) var(--space-4);
       color: var(--ink);
       text-decoration: none;
       font-size: var(--text-sm);
       border-left: 3px solid transparent;
-      transition: border-left-color var(--duration-fast), background-color var(--duration-fast);
+      border-radius: 0 4px 4px 0;
+      transition: all var(--duration-medium) var(--easing-smooth);
+      position: relative;
     }
 
     .manuscript-toc a:hover,
     .manuscript-toc a:focus {
       border-left-color: var(--gold-mid);
-      background-color: rgba(201, 167, 105, 0.08);
+      background: linear-gradient(
+        90deg,
+        rgba(212, 175, 55, 0.05) 0%,
+        transparent 100%
+      );
+      padding-left: calc(var(--space-4) + 4px);
     }
 
     .manuscript-toc a.active {
       border-left-color: var(--gold-base);
       font-weight: 600;
+      background: linear-gradient(
+        90deg,
+        rgba(212, 175, 55, 0.08) 0%,
+        transparent 100%
+      );
     }
 
-    /* Folio Header with Illuminated Initial */
+    .manuscript-toc a.active::before {
+      content: "→";
+      position: absolute;
+      left: calc(var(--space-2) * -1);
+      color: var(--gold-base);
+      opacity: 0;
+      transition: opacity var(--duration-fast);
+    }
+
+    .manuscript-toc a.active:hover::before {
+      opacity: 1;
+    }
+
+    /* =========================================================================
+       CONTENT AREA – DYNAMIC & RESPONSIVE
+       ========================================================================= */
+
+    .content-area {
+      grid-column: 2;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-16);
+      padding: var(--space-8) var(--margin-outside) var(--space-16) calc(var(--spine-width) + var(--margin-inside));
+      max-width: calc(100vw - var(--nav-width) - var(--spine-width) - var(--margin-outside));
+      overflow-x: hidden;
+    }
+
+    /* =========================================================================
+       FOLIO HEADER WITH ILLUMINATED INITIAL
+       ========================================================================= */
+
     .folio-header {
-      text-align: center;
-      padding: var(--space-12) var(--binding-margin);
       position: relative;
+      margin-bottom: var(--space-16);
     }
 
     .illuminated-initial {
-      width: clamp(80px, 15vw, 120px);
-      height: clamp(80px, 15vw, 120px);
-      margin: 0 auto var(--space-6);
+      width: clamp(80px, 12vw, 120px);
+      height: clamp(80px, 12vw, 120px);
+      margin: 0 0 var(--space-8) 0;
       position: relative;
     }
 
     .illuminated-initial svg {
       width: 100%;
       height: 100%;
-      filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.3));
+      filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.25));
+      transition: filter var(--duration-medium);
     }
 
-    /* Main Page Spread Grid - CORRECTED PROPORTIONS */
-    .page-spread {
-      display: grid;
-      grid-template-areas: 
-        "verso spine recto";
-      grid-template-columns: 
-        [verso-start] var(--nav-width) [verso-end spine-start] var(--spine-width) [spine-end recto-start] minmax(var(--content-min-width), 1fr) [recto-end];
-      max-width: 100%;
-      margin: 0 auto;
-    }
-
-    /* Spine (Central Gutter) - PROPER DIMENSIONS */
-    .spine {
-      grid-area: spine;
-      background: linear-gradient(180deg, 
-        transparent 0%, 
-        rgba(27, 26, 23, 0.03) 50%, 
-        transparent 100%);
-      position: relative;
-      contain: paint;
-    }
-
-    .spine::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 2px;
-      height: 60vh;
-      background: linear-gradient(180deg, 
-        transparent 0%, 
-        var(--gold-mid) 20%, 
-        var(--gold-mid) 80%, 
-        transparent 100%);
-      opacity: 0.6;
-    }
-
-    /* Verso (Left Page) - CORRECTED MARGINS */
-    .verso {
-      grid-area: verso;
-      padding: var(--space-8) var(--binding-margin) var(--space-8) var(--gutter-margin);
-      min-width: 0; /* Fix flex child overflow */
-    }
-
-    /* Recto (Right Page) - CORRECTED MARGINS */
-    .recto {
-      grid-area: recto;
-      padding: var(--space-8) var(--gutter-margin) var(--space-8) var(--binding-margin);
-      min-width: 0;
+    .illuminated-initial:hover svg {
+      filter: drop-shadow(0 6px 20px rgba(212, 175, 55, 0.4));
     }
 
     /* =========================================================================
-       Phase 3: Hero Section – "The Folio Opening"
+       HERO SECTION – "THE FOLIO OPENING"
        ========================================================================= */
 
     .folio-opening {
       position: relative;
-      margin-bottom: var(--space-16);
     }
 
     /* Ink Spreading Animation for Drop Cap */
@@ -388,7 +408,7 @@
       }
     }
 
-    /* Botanical Marginalia (Parallax Effect) */
+    /* Botanical Marginalia */
     .marginalia {
       position: absolute;
       width: 120px;
@@ -399,19 +419,18 @@
     }
 
     .marginalia.top-left {
-      top: -60px;
+      top: -40px;
       left: -60px;
       transform: translateY(20px);
     }
 
     .marginalia.bottom-right {
-      bottom: -60px;
-      right: -60px;
+      bottom: -40px;
+      right: -40px;
       transform: translateY(-20px);
     }
 
-    /* Intersection Observer polyfill via CSS animation-timeline (Chromium-only) */
-    /* Fallback: Marginalia visible by default if not supported */
+    /* Intersection Observer animation */
     @supports (animation-timeline: scroll()) {
       .marginalia {
         animation: fadeInMarginalia var(--duration-medium) both;
@@ -433,7 +452,7 @@
     /* Reduced motion: marginalia always visible */
     @media (prefers-reduced-motion: reduce) {
       .marginalia {
-        opacity: 0.3;
+        opacity: 0.2;
         transform: none;
         animation: none;
       }
@@ -464,7 +483,7 @@
     }
 
     /* =========================================================================
-       Phase 4: Product Miniatures – "Illuminated Miniatures"
+       PRODUCT MINIATURES – "ILLUMINATED MINIATURES"
        ========================================================================= */
 
     .illuminated-miniature {
@@ -479,7 +498,9 @@
 
     .illuminated-miniature:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(27, 26, 23, 0.12);
+      box-shadow: 
+        0 12px 40px rgba(27, 26, 23, 0.12),
+        0 0 0 1px rgba(212, 175, 55, 0.1);
     }
 
     /* Botanical Border (SVG Stroke Animation) */
@@ -512,6 +533,11 @@
       background-size: contain;
       background-repeat: no-repeat;
       opacity: 0.7;
+      transition: opacity var(--duration-fast);
+    }
+
+    .illuminated-miniature:hover .alchemical-symbol {
+      opacity: 1;
     }
 
     /* Symbol backgrounds (data URIs) */
@@ -528,12 +554,14 @@
       font-size: var(--text-lg);
       font-weight: 600;
       margin-bottom: var(--space-2);
+      line-height: 1.3;
     }
 
     .product-description {
       font-size: var(--text-sm);
       color: rgba(27, 26, 23, 0.7);
       margin-bottom: var(--space-4);
+      line-height: 1.5;
     }
 
     .product-price {
@@ -541,27 +569,45 @@
       font-size: var(--text-xl);
       color: var(--gold-base);
       display: inline-block;
+      text-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
     }
 
     .product-link {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 44px;
       margin-top: var(--space-4);
       padding: var(--space-2) var(--space-4);
       border: 1px solid var(--gold-mid);
       border-radius: 4px;
       color: var(--ink);
       text-decoration: none;
-      transition: background-color var(--duration-fast), color var(--duration-fast);
+      font-size: var(--text-sm);
+      transition: all var(--duration-fast) var(--easing-smooth);
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 100%
+      );
     }
 
     .product-link:hover,
     .product-link:focus {
-      background-color: var(--gold-mid);
+      background: linear-gradient(
+        to bottom,
+        var(--gold-mid) 0%,
+        var(--gold-base) 100%
+      );
       color: var(--parchment);
+      border-color: var(--gold-base);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
     }
 
     /* =========================================================================
-       Phase 5: Collections & About – "Chapters & Marginalia"
+       COLLECTIONS & ABOUT – "CHAPTERS & MARGINALIA"
        ========================================================================= */
 
     .chapter {
@@ -575,6 +621,21 @@
       color: var(--burgundy);
       margin-bottom: var(--space-4);
       position: relative;
+      display: inline-block;
+    }
+
+    .chapter h2::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 40%;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        var(--gold-base) 0%,
+        transparent 100%
+      );
     }
 
     /* Drop Cap for Chapter Starts */
@@ -592,12 +653,17 @@
     /* Marginalia Notes */
     .marginalia-note {
       position: relative;
-      background: rgba(201, 167, 105, 0.05);
+      background: linear-gradient(
+        90deg,
+        rgba(201, 167, 105, 0.05) 0%,
+        rgba(201, 167, 105, 0.02) 100%
+      );
       border-left: 3px solid var(--gold-mid);
       padding: var(--space-4);
       margin: var(--space-6) 0;
       font-size: var(--text-sm);
       font-style: italic;
+      border-radius: 0 4px 4px 0;
     }
 
     .marginalia-note::before {
@@ -609,6 +675,7 @@
       font-size: var(--text-lg);
       background: var(--parchment);
       padding: 0 var(--space-1);
+      transform: rotate(15deg);
     }
 
     /* About Section (Two-Column Spread) */
@@ -636,7 +703,7 @@
     }
 
     /* =========================================================================
-       Phase 6: Newsletter & Footer – "The Wax Seal"
+       NEWSLETTER & FOOTER – "THE WAX SEAL"
        ========================================================================= */
 
     .wax-seal-section {
@@ -648,10 +715,30 @@
       text-align: center;
       margin: var(--space-16) 0;
       perspective: 1000px;
+      overflow: hidden;
+    }
+
+    .wax-seal-section::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle at center,
+        rgba(212, 175, 55, 0.03) 0%,
+        transparent 70%
+      );
+      pointer-events: none;
     }
 
     .wax-seal-button {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 44px;
       padding: var(--space-3) var(--space-6);
       background: linear-gradient(145deg, var(--burgundy) 0%, #5a4237 100%);
       color: var(--parchment);
@@ -674,7 +761,7 @@
 
     .wax-seal-button:hover,
     .wax-seal-button:focus {
-      transform: rotateX(0deg);
+      transform: rotateX(0deg) scale(1.05);
       filter: brightness(1.1);
       box-shadow: 
         0 12px 30px rgba(58, 44, 36, 0.4),
@@ -696,13 +783,15 @@
       padding: var(--space-3);
       border: 1px solid rgba(27, 26, 23, 0.2);
       border-radius: 4px;
-      transition: border-color var(--duration-fast);
+      background: rgba(255, 255, 255, 0.8);
+      transition: all var(--duration-fast);
     }
 
     .newsletter-input:focus {
       outline: none;
       border-color: var(--gold-mid);
       box-shadow: 0 0 0 3px rgba(201, 167, 105, 0.2);
+      background: var(--parchment);
     }
 
     /* Error state for validation */
@@ -719,6 +808,7 @@
       font-size: var(--text-sm);
       color: rgba(27, 26, 23, 0.6);
       position: relative;
+      margin-top: var(--space-16);
     }
 
     .colophon::before {
@@ -735,7 +825,7 @@
     }
 
     /* =========================================================================
-       Phase 7: Accessibility & Performance Polish
+       ACCESSIBILITY & PERFORMANCE POLISH
        ========================================================================= */
 
     /* Focus Visible (Keyboard Only) */
@@ -784,108 +874,111 @@
       display: none;
     }
 
-    /* Off-canvas overlay for mobile navigation */
-    .nav-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(27, 26, 23, 0.85);
-      z-index: var(--z-overlay);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity var(--duration-medium), visibility var(--duration-medium);
-    }
-
-    .nav-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .mobile-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 85vw;
-      max-width: var(--nav-width);
-      background: var(--parchment);
-      z-index: var(--z-modal);
-      transform: translateX(-100%);
-      transition: transform var(--duration-medium) var(--easing-smooth);
-      padding: var(--space-6) var(--space-4);
-      border-right: 1px solid rgba(27, 26, 23, 0.08);
-      overflow-y: auto;
-    }
-
-    .mobile-nav.active {
-      transform: translateX(0);
-    }
-
-    .close-nav {
-      position: absolute;
-      top: var(--space-4);
-      right: var(--space-4);
-      background: transparent;
-      border: none;
-      color: var(--ink);
-      font-size: 1.5rem;
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
-    }
-
     /* =========================================================================
-       Responsive Design (Mobile-First) - CORRECTED
+       RESPONSIVE DESIGN – MOBILE-FIRST ENHANCEMENTS
        ========================================================================= */
 
     /* Tablet (768px) */
     @media (max-width: 768px) {
-      .nav-toggle {
-        display: flex;
+      :root {
+        --nav-width: 240px;
+        --spine-width: 0;
+        --margin-outside: 4vw;
+        --margin-inside: 2vw;
       }
-      
-      .manuscript-toc {
-        display: none; /* Hidden on mobile, accessible via toggle */
-      }
-      
+
       .page-spread {
-        grid-template-areas: 
-          "recto";
         grid-template-columns: 1fr;
       }
-      
-      .verso {
-        display: none; /* Hidden on mobile */
+
+      .page-spread::before {
+        display: none;
       }
-      
-      .spine {
-        display: none; /* Hidden on mobile */
+
+      .manuscript-toc {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: var(--nav-width);
+        height: 100vh;
+        z-index: 1000;
+        transition: left var(--duration-medium) var(--easing-smooth);
+        padding: var(--space-8) var(--space-4);
+        border-right: none;
+        box-shadow: 4px 0 20px rgba(27, 26, 23, 0.1);
       }
-      
-      .recto {
-        padding: var(--space-6) var(--gutter-margin);
+
+      .manuscript-toc.active {
+        left: 0;
       }
-      
+
+      .content-area {
+        grid-column: 1;
+        padding: var(--space-6);
+        max-width: 100%;
+      }
+
+      .folio-opening {
+        margin-top: var(--space-8);
+      }
+
       .about-spread {
         grid-template-columns: 1fr;
       }
-      
+
       .newsletter-form {
         grid-template-columns: 1fr;
       }
-      
+
       .wax-seal-button {
         width: 100px;
         height: 100px;
-        font-size: var(--text-md);
+        font-size: var(--text-base);
+      }
+
+      /* Mobile menu toggle */
+      .mobile-menu-toggle {
+        position: fixed;
+        top: var(--space-4);
+        left: var(--space-4);
+        z-index: 1001;
+        width: 44px;
+        height: 44px;
+        background: var(--gold-base);
+        border: none;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        cursor: pointer;
+      }
+
+      .mobile-menu-toggle span {
+        width: 20px;
+        height: 2px;
+        background: var(--parchment);
+        transition: transform var(--duration-fast);
+      }
+
+      .mobile-menu-toggle.active span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+      }
+
+      .mobile-menu-toggle.active span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .mobile-menu-toggle.active span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
       }
     }
 
     /* Mobile (480px) */
     @media (max-width: 480px) {
       :root {
-        --binding-margin: clamp(1rem, 3vw, 2rem);
-        --gutter-margin: clamp(0.75rem, 1.5vw, 1.5rem);
-        --nav-width: 85vw;
+        --margin-outside: 3vw;
       }
 
       .drop-cap::first-letter {
@@ -893,43 +986,63 @@
       }
 
       .product-title {
-        font-size: var(--text-md);
+        font-size: var(--text-base);
       }
-      
-      .folio-header {
-        padding: var(--space-8) var(--binding-margin);
+
+      .wax-seal-section {
+        padding: var(--space-8) var(--space-4);
+      }
+
+      .illuminated-miniature {
+        padding: var(--space-4);
+      }
+    }
+
+    /* Large Desktop (1440px+) */
+    @media (min-width: 1440px) {
+      :root {
+        --nav-width: 320px;
+        --spine-width: 2vw;
+        --margin-outside: 10vw;
+        --margin-inside: 4vw;
+      }
+
+      .content-area {
+        max-width: calc(1400px - var(--nav-width) - var(--spine-width) - var(--margin-outside));
+        margin: 0 auto;
       }
     }
 
     /* =========================================================================
-       Print Styles
+       PRINT STYLES
        ========================================================================= */
     @media print {
       body::before {
-        display: none; /* Remove parchment texture */
+        display: none;
       }
 
       .marginalia,
       .peranakan-pattern,
-      .nav-toggle,
-      .spine {
-        display: none; /* Hide decorations */
+      .page-spread::before {
+        display: none;
+      }
+
+      .manuscript-toc {
+        position: static;
+        height: auto;
+        width: 100%;
+        border: 1px solid #ccc;
       }
 
       .wax-seal-button {
-        background: #000; /* Black seal for print */
+        background: #000;
+        color: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
 
       a[href]::after {
-        content: " (" attr(href) ")"; /* Show URLs */
-      }
-      
-      .page-spread {
-        grid-template-columns: 1fr !important;
-      }
-      
-      .verso, .recto {
-        padding: var(--space-4) !important;
+        content: " (" attr(href) ")";
       }
     }
   </style>
@@ -937,45 +1050,32 @@
 <body>
   <!-- Skip Link (Accessibility) -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
-  
-  <!-- Mobile Navigation Toggle -->
-  <button class="nav-toggle" aria-expanded="false" aria-controls="mobile-navigation" aria-label="Toggle navigation">
-    <span>☰</span>
+
+  <!-- Mobile Menu Toggle (Hidden on Desktop) -->
+  <button class="mobile-menu-toggle" aria-label="Toggle table of contents" aria-expanded="false" hidden>
+    <span></span>
+    <span></span>
+    <span></span>
   </button>
 
-  <!-- Mobile Navigation Overlay -->
-  <div class="nav-overlay" id="nav-overlay"></div>
-  
-  <div class="mobile-nav" id="mobile-navigation" aria-label="Mobile navigation">
-    <button class="close-nav" aria-label="Close navigation">×</button>
-    <h2 class="gold-illumination" style="font-size: var(--text-lg); margin-bottom: var(--space-4);">Contents</h2>
-    <ul>
-      <li><a href="#folio-opening" class="active">Folio Opening</a></li>
-      <li><a href="#featured">Featured Miniatures</a></li>
-      <li><a href="#collections">Collections</a></li>
-      <li><a href="#atelier">The Atelier</a></li>
-      <li><a href="#newsletter">Subscribe</a></li>
-    </ul>
-  </div>
-
-  <!-- Main Page Spread - CORRECTED LAYOUT -->
+  <!-- Main Page Spread -->
   <div class="page-spread">
-    <!-- Verso Page (Left) - FIXED WIDTH NAVIGATION -->
-    <div class="verso">
-      <!-- Navigation (Table of Contents) -->
-      <nav class="manuscript-toc" aria-label="Table of Contents">
-        <h2 class="gold-illumination" style="font-size: var(--text-lg); margin-bottom: var(--space-4);">Contents</h2>
-        <ul>
-          <li><a href="#folio-opening" class="active">Folio Opening</a></li>
-          <li><a href="#featured">Featured Miniatures</a></li>
-          <li><a href="#collections">Collections</a></li>
-          <li><a href="#atelier">The Atelier</a></li>
-          <li><a href="#newsletter">Subscribe</a></li>
-        </ul>
-      </nav>
+    <!-- Navigation (Table of Contents) -->
+    <nav class="manuscript-toc" aria-label="Table of Contents">
+      <h2 class="gold-illumination" style="font-size: var(--text-lg); margin-bottom: var(--space-4);">Contents</h2>
+      <ul>
+        <li><a href="#folio-opening" class="active">Folio Opening</a></li>
+        <li><a href="#featured">Featured Miniatures</a></li>
+        <li><a href="#collections">Collections</a></li>
+        <li><a href="#atelier">The Atelier</a></li>
+        <li><a href="#newsletter">Subscribe</a></li>
+      </ul>
+    </nav>
 
+    <!-- Main Content Area -->
+    <main class="content-area" id="main-content">
       <!-- Hero Section (Folio Opening) -->
-      <header id="main-content" class="folio-opening">
+      <header class="folio-opening" id="folio-opening">
         <!-- Botanical Marginalia -->
         <div class="marginalia top-left" aria-hidden="true">
           <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
@@ -1010,7 +1110,7 @@
         <h1 class="gold-illumination" style="font-size: var(--text-4xl); margin-bottom: var(--space-4);">
           Atelier Arôme
         </h1>
-        <p style="font-size: var(--text-lg); color: rgba(27, 26, 23, 0.7); margin-bottom: var(--space-6);">
+        <p style="font-size: var(--text-lg); color: rgba(27, 26, 23, 0.7); margin-bottom: var(--space-6); max-width: 65ch;">
           Hand-forged aromatherapy blends presented like illuminated pages — botanical wisdom, crafted with care in Singapore.
         </p>
 
@@ -1044,13 +1144,7 @@
           <svg viewBox="0 0 24 24"><path d="M12 2v20" stroke-linecap="round"/></svg>
         </div>
       </header>
-    </div>
 
-    <!-- Spine (Central Gutter) - PROPER WIDTH -->
-    <div class="spine" aria-hidden="true"></div>
-
-    <!-- Recto Page (Right) - PRIMARY CONTENT -->
-    <div class="recto">
       <!-- Featured Products (Miniatures) -->
       <section id="featured">
         <h2 class="gold-illumination" style="font-size: var(--text-2xl); margin-bottom: var(--space-4);">Featured Miniatures</h2>
@@ -1130,7 +1224,7 @@
         <h2 class="gold-illumination">
           Collections
         </h2>
-        <p class="drop-cap" style="margin-bottom: var(--space-4);">
+        <p class="drop-cap" style="margin-bottom: var(--space-4); max-width: 65ch;">
           Each collection represents a chapter in our ongoing manuscript of scent. From the grounding resins of the Apothecary series to the bright florals of the Garden collection, every blend is a carefully composed verse.
         </p>
         <ul style="list-style: none; padding: 0;">
@@ -1153,7 +1247,7 @@
         </h2>
         <div class="about-spread">
           <div>
-            <p class="drop-cap">
+            <p class="drop-cap" style="max-width: 65ch;">
               Founded by an herbalist & bookbinder, Atelier Arôme blends ancient craft with modern quality control. We treat scent as scripture—each batch recorded, archived, and stamped.
             </p>
             <ul style="list-style: none; padding: 0; margin-top: var(--space-4);">
@@ -1208,7 +1302,7 @@
           We never share your email. Unsubscribe anytime. GST 9% applied at checkout.
         </p>
       </section>
-    </div>
+    </main>
   </div>
 
   <!-- Footer Colophon -->
@@ -1224,9 +1318,9 @@
     </p>
   </footer>
 
-  <!-- Minimal Progressive Enhancement JS -->
+  <!-- Enhanced Progressive Enhancement JS -->
   <script>
-    // Log performance metrics (non-critical)
+    // Performance metrics (non-critical)
     if ('performance' in window) {
       window.addEventListener('load', function() {
         setTimeout(function() {
@@ -1237,68 +1331,78 @@
       });
     }
 
-    // Optional: Smooth scroll for navigation (respects reduced motion)
-    var navLinks = document.querySelectorAll('.manuscript-toc a, .mobile-nav a');
-    navLinks.forEach(function(link) {
-      link.addEventListener('click', function(e) {
-        // Close mobile nav if open
-        var mobileNav = document.getElementById('mobile-navigation');
-        var overlay = document.getElementById('nav-overlay');
-        if (mobileNav.classList.contains('active')) {
-          mobileNav.classList.remove('active');
-          overlay.classList.remove('active');
-          document.querySelector('.nav-toggle').setAttribute('aria-expanded', 'false');
-        }
-        
-        // Smooth scroll if not reduced motion
-        if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-          e.preventDefault();
-          var targetId = this.getAttribute('href');
-          var target = document.querySelector(targetId);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }
-      });
-    });
+    // Enhanced navigation
+    var navLinks = document.querySelectorAll('.manuscript-toc a');
+    var mobileToggle = document.querySelector('.mobile-menu-toggle');
+    var toc = document.querySelector('.manuscript-toc');
 
-    // Mobile navigation toggle
-    var navToggle = document.querySelector('.nav-toggle');
-    var mobileNav = document.getElementById('mobile-navigation');
-    var overlay = document.getElementById('nav-overlay');
-    var closeNav = document.querySelector('.close-nav');
-
-    if (navToggle && mobileNav && overlay) {
-      navToggle.addEventListener('click', function() {
+    // Mobile menu toggle
+    if (mobileToggle) {
+      mobileToggle.hidden = false;
+      mobileToggle.addEventListener('click', function() {
         var isExpanded = this.getAttribute('aria-expanded') === 'true';
         this.setAttribute('aria-expanded', !isExpanded);
-        mobileNav.classList.toggle('active', !isExpanded);
-        overlay.classList.toggle('active', !isExpanded);
+        this.classList.toggle('active');
+        toc.classList.toggle('active');
       });
 
-      overlay.addEventListener('click', function() {
-        navToggle.setAttribute('aria-expanded', 'false');
-        mobileNav.classList.remove('active');
-        overlay.classList.remove('active');
+      // Close menu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (toc.classList.contains('active') && 
+            !toc.contains(e.target) && 
+            !mobileToggle.contains(e.target)) {
+          toc.classList.remove('active');
+          mobileToggle.classList.remove('active');
+          mobileToggle.setAttribute('aria-expanded', 'false');
+        }
       });
-
-      if (closeNav) {
-        closeNav.addEventListener('click', function() {
-          navToggle.setAttribute('aria-expanded', 'false');
-          mobileNav.classList.remove('active');
-          overlay.classList.remove('active');
-        });
-      }
     }
 
-    // Handle keyboard navigation for mobile menu
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        navToggle.setAttribute('aria-expanded', 'false');
-        mobileNav.classList.remove('active');
-        overlay.classList.remove('active');
-      }
+    // Smooth scroll with offset for sticky nav
+    navLinks.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var targetId = this.getAttribute('href');
+        var target = document.querySelector(targetId);
+        if (target) {
+          // Close mobile menu if open
+          if (mobileToggle && mobileToggle.classList.contains('active')) {
+            toc.classList.remove('active');
+            mobileToggle.classList.remove('active');
+            mobileToggle.setAttribute('aria-expanded', 'false');
+          }
+
+          // Calculate offset for sticky elements
+          var offset = 100;
+          var targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+
+          // Update active link
+          navLinks.forEach(function(l) { l.classList.remove('active'); });
+          this.classList.add('active');
+        }
+      });
     });
+
+    // Intersection Observer for scroll-based effects
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      // Observe sections for potential future animations
+      document.querySelectorAll('.chapter, .illuminated-miniature').forEach(function(el) {
+        observer.observe(el);
+      });
+    }
   </script>
 </body>
 </html>
