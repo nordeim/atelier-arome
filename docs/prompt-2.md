@@ -14,6 +14,10 @@ Now, please meticulously review and analyze @AGENT.md , @Updated_Project_Underst
 
 ---
 
+Now, please meticulously review and analyze @AGENT.md , @README.md and @Deep_Project_Understanding_Document.md to have a deep understanding of the project and its codebase current design and architecture. Next, validate your deep understanding and any findings and assumptions with the actual codebase file. Finally, replace the existing `CLAUDE.md` with the correct content (claude briefing document).
+
+---
+
 Awesome job on your meticulous review, analysis and planning! Please keep up the good work in your rigorous and meticulous approach to planning and execution! Remember always to meticulously plan to create a detailed TODO list with checklist for each activity to be executed.
 Yes, please meticulously proceed according to your plan. Before starting each phase, remember to meticulously plan and create the sub-plan for the phase with integrated checklist.
 
