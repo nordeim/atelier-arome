@@ -85,6 +85,45 @@ atelier-arome/
 
 ---
 
+## Codebase Ground Truth (Validated January 9, 2026)
+
+> **IMPORTANT:** This section is validated against the actual codebase. Previous documentation contained inaccuracies.
+
+### Backend (Laravel 12 API)
+
+| Component | Status | Details |
+|-----------|--------|---------||
+| **Models** | ⚠️ **PARTIAL (16/22)** | 16 fully implemented, 6 skeleton |
+| **Controllers** | ❌ **MISSING** | Only base `Controller.php` exists |
+| **API Resources** | ❌ **MISSING** | Directory doesn't exist |
+| **Routes** | ❌ **INCOMPLETE** | No `api.php` (only `web.php`, `console.php`) |
+| **Database** | ✅ **COMPLETE** | 26 tables, migrations run, seeders executed |
+
+**Fully Implemented Models (16):**
+- Product, Order, User, Cart, Address, Coupon, Payment, OrderItem
+- CartItem, ProductVariant, ProductImage, Category, Tag, Testimonial, Inventory, Setting
+
+**Skeleton Models (6):**
+- Review, Wishlist, WishlistItem, CouponUsage, NewsletterSubscriber, InventoryMovement
+
+### Frontend (Next.js 15)
+
+| Component | Status | Details |
+|-----------|--------|---------||
+| **App Router** | ✅ **COMPLETE** | All route groups configured |
+| **Components** | ⚠️ **PARTIAL** | 11 components across 4 directories |
+| **Tailwind Config** | ✅ **COMPLETE** | Custom theme with Illuminated Manuscript tokens |
+| **State Management** | ✅ **CONFIGURED** | Zustand cart-store implemented |
+
+### Immediate Next Steps (Phase 2)
+
+1. **Create API Resources:** `php artisan make:resource ProductResource`, etc.
+2. **Create Controllers:** `ProductController`, `CartController`, `AuthController`
+3. **Add API Routes:** Create `routes/api.php` with versioned endpoints
+4. **Complete Skeleton Models:** Add fillable, casts, relationships to 6 skeleton models
+
+---
+
 ## Component Architecture
 
 ### Atomic Design Pattern
@@ -636,7 +675,7 @@ keyframes: {
 
 ## Database Schema Overview
 
-**Total Tables:** 24 (22 business + migrations + sessions)
+**Total Tables:** 26 (validated via PostgreSQL query)
 
 **Core Auth (3 tables):**
 - `users` (customer + admin unified, UUID, soft deletes, role enum)

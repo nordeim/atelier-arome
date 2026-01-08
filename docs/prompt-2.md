@@ -14,7 +14,11 @@ Now, please meticulously review and analyze @AGENT.md , @Updated_Project_Underst
 
 ---
 
-Now, please meticulously review and analyze @AGENT.md , @README.md and @Deep_Project_Understanding_Document.md to have a deep understanding of the project and its codebase current design and architecture. Next, validate your deep understanding and any findings and assumptions with the actual codebase file. Finally, replace the existing `CLAUDE.md` with the correct content (claude briefing document).
+Now, please meticulously review and analyze @AGENT.md , @README.md , @GEMINI.md and @Deep_Project_Understanding_Document.md to have a deep understanding of the project and its codebase current design and architecture. Next, validate your deep understanding and any findings and assumptions with the actual codebase file. Finally, meticulously plan and update `CLAUDE.md` (claude briefing document) so that it correctly and accurately reflect the current codebase.
+
+---
+
+Now, please meticulously review and analyze @AGENT.md , @README.md , @GEMINI.md and @Deep_Project_Understanding_Document.md to have a deep understanding of the project and its codebase current design and architecture. Next, validate your deep understanding and any findings and assumptions with the actual codebase file. Finally, replace the existing `CLAUDE.md` with the correct content (claude briefing document).
 
 ---
 
